@@ -1,5 +1,5 @@
-#include "structures.h"
-#include "definitions.h"
+#include "structures.hpp"
+#include "definitions.hpp"
 
 ////
 

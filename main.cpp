@@ -6,7 +6,7 @@
 #include <fstream>
 #include <string>
 
-#include "nbody.h"
+#include "nbody.hpp"
 
 using namespace std;
 

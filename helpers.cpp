@@ -1,4 +1,4 @@
-#include "structures.h"
+#include "structures.hpp"
 
 RVec mix_rvecs(RVec * rvecs, int n){
         //initialize variables

@@ -94,10 +94,10 @@
     <File Name="main.cpp"/>
     <File Name="nbody.cpp"/>
     <File Name="structures.cpp"/>
-    <File Name="nbody.h"/>
-    <File Name="structures.h"/>
     <File Name="helpers.cpp"/>
-    <File Name="helpers.h"/>
-    <File Name="definitions.h"/>
+    <File Name="definitions.hpp"/>
+    <File Name="helpers.hpp"/>
+    <File Name="nbody.hpp"/>
+    <File Name="structures.hpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

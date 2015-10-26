@@ -1,4 +1,4 @@
-#include "helpers.h"
+#include "helpers.hpp"
 
 class NBody {
         public:
