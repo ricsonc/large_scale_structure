@@ -22,8 +22,6 @@ RandomVec mix_rvecs(std::vector<RandomVec> rvecs){
 }
 
 void to_image(std::vector<std::vector<bool>> img, string filename){
-        //writes to ppm format
-        //convert bool array to char representation
         std::vector<char> outstring (2*pow(img.size(),2));
         for(std::size_t i = 0; i < img.size(); i++){
                 for(std::size_t j = 0; j < img.size(); j++){
@@ -32,7 +30,6 @@ void to_image(std::vector<std::vector<bool>> img, string filename){
                         outstring[index*2+1] = (j+1 == n) ? '\n' : ' ';
                 }
         }
-        //write header and array to file
         std::vector<char> nchars;
         string nstring = *itoa(n, nchars, 10);
         string header = "P1\n" + nstring + " " + nstring + "\n";
@@ -66,4 +63,3 @@ Real lat_dist(Vec pos1, Vec pos2, Real lattice){
     Real dy = min(dy_inner,dy_outer);
     return sqrt(dx*dx+dy*dy);
 }
-

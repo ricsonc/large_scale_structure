@@ -61,8 +61,6 @@ Tree built_qtree_r(Rect rect, std::vector<Body> bodies, int n){
         return tree;
 }
 
-
-
 Vec NBody::p_accel(Vec p1, Vec p2, Real mass, Real distance){
         Real mag_accel = uargs.gconst*mass/(distance*distance+plummer*plummer);
         Real dir_accel = atan2(p2.y-p1.y, p2.x-p1.x);
@@ -92,6 +90,7 @@ Vec NBody::grid_accel(Vec pos){
         return accel;
 }
 
+//rewrite
 <std::vector<std::vector<Vec>> NBody::GP_field(int mesh, REAL size){
         Real spacing = size/mesh;
         <std::vector<std::vector<Vec>> field (mesh, mesh);
@@ -105,10 +104,12 @@ Vec NBody::grid_accel(Vec pos){
         return field;
 }
 
+//rewrite
 void NBody::init_field(){
         field = GP_field(uargs.mesh, uargs.size);
 }
 
+//what's this?
 Vec NBody::pbc_accel(Vec pos, RVec center, Real lattice_dist){
         //rewrite with mesh
         Vec accel = {0,0};
@@ -118,6 +119,7 @@ Vec NBody::pbc_accel(Vec pos, RVec center, Real lattice_dist){
                 //call grid_accel
 }
 
+//rewrite
 Vec NBody::body_accel(int id){
         //don't use id
         Vec accel = {0,0};
@@ -143,8 +145,10 @@ Vec NBody::body_accel(int id){
 
 std::vector<Vec> NBody::accelerations(){ 
         static std::vector<Vec> accs (this->bodies.size());
-        for(std::size_t i = 0; i < this->bodies.size(); i++){
-                accs[i] = body_accel(i);
+        int i = 0;
+        for(auto body: this->bodies){
+            accs[i] = body_accel(body);
+            i++;
         }
         return accs;
 }
@@ -164,8 +168,6 @@ std::vector<Body> initialbodies(int n, Real size, Real mass, Real displacement_r
     }
     return bodies;
 }
-
-//below ok
 
 NBody::NBody(CReal density = 1E-26, //kg*m^-3
              CReal size = 5E+23, //m
@@ -189,7 +191,7 @@ NBody::NBody(CReal density = 1E-26, //kg*m^-3
     universe_args uargs = {initsize, hubble, plummer, gravity};
     simulation_args sargs = {QTR, lattice, mass, simtime, timestep, gridlimit, filename, drawsize};
     std::vector<Body> bodies = initialbodies(num_bodies, initsize, mass, displacement, max_velocity);
-    std::vector<std::vector<Real>> forcefield = compute_forcefield(resolution, tiling);
+    std::vector<std::vector<Real>> forcefield = init_field(resolution, tiling);
     return {.bodies = bodies, .uargs = uargs, .sargs = sargs, .force_field = forcefield};
 }
 

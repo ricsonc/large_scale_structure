@@ -37,15 +37,9 @@ typedef struct Body Body;
 struct Node {
         Rect rect;
         RVec center;
-        Body &body;
+        Body *body;
 };
 typedef struct Node Node;
-
-struct Tree {
-        Node node;
-        std::vector<Tree> children;
-};
-typedef struct Tree Tree;
 
 struct universe_args {
     Real size;
