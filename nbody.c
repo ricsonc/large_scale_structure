@@ -3,8 +3,8 @@
 
 //helper functions
 
-void group_bodies(Rect rect, std::vector<Body> bodies, int n, 
-                  std::array<Rect,4> rects, std::array<std::vector<Body>,4> groups, std::array<int,4> ns){
+void group_bodies(Rect rect, Body * bodies, int n, 
+                  Rect * rects, Body ** groups, int * ns){
         //init rects
         Real minx = rect.pos0.x;
         Real miny = rect.pos0.y;
@@ -29,14 +29,14 @@ void group_bodies(Rect rect, std::vector<Body> bodies, int n,
         }
 }
 
-Tree built_qtree_r(Rect rect, std::vector<Body> bodies, int n){
-        std::vector<Tree> tree_children;
+Tree built_qtree_r(Rect rect, Body * bodies, int n){
+        Tree tree_children[4];
         Node node = {.rect = rect};
         node.body = NULL;
         Tree tree = {.node = node, .trees = tree_children};
-        std::array<Rect> rects (4);
-        std::array<std::vector<Body>,4> groups;
-        std::array<int,4> ns;
+        Rect rects[4];
+        Body groups[4][n];
+        int ns[4];
         group_bodies(rect, bodies, n, rects, groups, ns);
         //recursively call
         int num_child = 4;
@@ -52,7 +52,7 @@ Tree built_qtree_r(Rect rect, std::vector<Body> bodies, int n){
         }
         //compute center
         tree.num_child = num_child;
-        std::vector<Rvec> centers (num_child);
+        Rvec * centers = Rvec[num_child];
         for(int j = 0; j < num_child; j++){
                 centers[j] = tree.trees[j].center;
         }
@@ -69,89 +69,62 @@ void NBody::metric_expansion(Real dt){
         }
 }
 
-void NBody::border_wrap(){
+void NBody::border_wrap(void){
         for(int i = 0; i < num_bodies; i++){
                 bodies[i].p.x = fmod(bodies[i].p.x, uargs.size);
                 bodies[i].p.y = fmod(bodies[i].p.y, uargs.size);
         }
 }
 
-void NBody::build_qtree(){
-        return build_qtree_r({{0,0},{size,size}}, bodies, uargs.numbodies);
+void NBody::build_qtree(void){
+        return build_qtree_r({{0,0},{size,size}}, bodies, uargs->numbodies);
 }
 
 void NBody::leapfrog(Real dt){
-        std::vector<Vec> accs = accelerations();
+        Vec * accs = accelerations();
         for(int i = 0; i < num_bodies; i++){
-                bodies[i].p.P(bodies[i].v.M(dt)); 
+                bodies[i].p.P(bodies[i].v.M(dt));
                 bodies[i].v.P(accs[i].M(dt));
         }
 }
 
-Vec NBody::p_accel(Vec p1, Vec p2, Real mass, Real distance){
+Vec NBody::accel(Vec p1, Vec p2, Real mass, Real distance){
         Real mag_accel = uargs.gconst*mass/(distance*distance+plummer*plummer);
         Real dir_accel = atan2(p2.y-p1.y, p2.x-p1.x);
         return {acc*cos(dir_accel), acc*sin(dir_accel)};
 }
 
-Vec NBody::grid_accel(Vec pos){
+Vec NBody::lattice_accel(Vec pos, RVec center, Real lattice_dist){
         Vec accel = {0,0};
-        int lat = uargs.lattice;
+        int lat = uargs->lattice;
         //find all csom and distances
-        std::vector<Vec> CsOM (lat*lat);
-        std::vector<Real> distances (lat*lat);
+        Vec * CsOM = Vec[lat*lat];
+        Real * distances = Real[lat*lat];
         for(int x = -lat; i <= lat; i++){
                 for(y = -lat; y <= lat; y++){
                         int index = x*lat+y;
-                        Vec Com = {x*size, y*size};
+                        Vec Com = {pos.x+x*size, pos.y+y*size};
                         CsOM[index] = COM;
                         distances[index] = distance(pos, COM);
                 }
         }
         //compute acceleration
         for(int i = 0; i < lat*lat; i++){
-                if(distances[i]*lattice < size){
-                        accel.P(p_accel(pos, CsOM[i], 1, distances[i]));
+                //why?
+                if(distances[i]/lattice_dist < lattice+1){
+                        accel.P(pos, center.vec, center.mass, distances[i]);
                 }
         }
         return accel;
 }
 
-<std::vector<std::vector<Vec>> NBody::GP_field(int mesh, REAL size){
-        Real spacing = size/mesh;
-        <std::vector<std::vector<Vec>> field (mesh, mesh);
-        for(int i = 0; i < lattice; i++){
-                for(int j = 0; j < lattice; j++){
-                        Real px = (i+0.5)*spacing;
-                        Real py = (j+0.5)*spacing;
-                        field[i][j] = grid_accel({px,py});
-                }
-        }
-        return field;
-}
-
-void NBody::init_field(){
-        field = GP_field(uargs.mesh, uargs.size);
-}
-
-Vec NBody::pbc_accel(Vec pos, RVec center, Real lattice_dist){
-        //rewrite with mesh
-        Vec accel = {0,0};
-        //if close
-                //call p_accel
-        //else
-                //call grid_accel
-}
-
 Vec NBody::body_accel(int id){
-        //don't use id
         Vec accel = {0,0};
-        //rewrite with std::stack instead of tree_stack
-        static Tree_stack BFSS = {0, Tree[uargs.nbody]};
+        static Tree_stack BFSS = {0, Tree[uargs->nbody]};
         BFSS.add(quadtree);
         while(BFSS.n){
                 tree = BFSS.pop();
-                Real lattice_dist = lat_dist(bodies[i].p, tree.center.var, uargs.size);
+                Real lattice_dist = lat_dist(bodies[i].p, tree.center.var, uargs->size);
                 if(tree.node.body != NULL && tree.node.body->id == id){
                         continue;
                 } else if (tree.node.center.var == 0 || 
@@ -166,47 +139,48 @@ Vec NBody::body_accel(int id){
         return accel;
 }
 
-std::vector<Vec> NBody::accelerations(){ 
-        static std::vector<Vec> accs (this.bodies.size());
-        for(std::size_t i = 0; i < this.bodies.size(); i++){
+Vec * NBody::accelerations(void){ 
+        static Vec * accs;
+        if(accs == NULL){
+                Vec * accs = new Vec[num_bodies];
+        }
+        for(int i = 0; i < num_bodies; i++){
                 accs[i] = body_accel(i);
         }
         return accs;
 }
 
-void NBody::step(){
+void NBody::step(Real dt, Dargs dargs = NULL){
         build_qtree();
-        leapfrog();
+        leapfrog(dt);
         border_wrap();
-        metric_expansion();
-        if(this.dargs != NULL){
-                draw(this.dargs);
+        metric_expansion(dt);
+        if(dargs != NULL){
+                draw(dargs);
         }
 }
 
-void NBody::simulate(verbose = True){
-        for(int i = 0; i < this.simtime/this.timestep; i++){
+void NBody::simulate(Real simtime, Real dt, string simname, int disp_size, verbose = True){
+        for(int i = 0; i < simetime/dt; i++){
                 if(verbose){
-                        printf("%f\n", dt*i);
+                        printf("%f", dt*i);
                 }
-                step(this.timestep, {simname+to_string(i)});
+                step(dt, {simname+to_string(i), disp_size});
         }
 }
 
-void NBody::draw(string filename){
-        Real dsize = this.dargs.size;
-        static bool init = true;
-        static std::vector<bool> pixelarr;
-        if(init){
-                pixelarr = new bool[dsize][dsize];
-                init = false;
+void NBody::draw(Dargs dargs){
+        Real dsize = dargs.size;
+        static bool * parr;
+        if(parr == NULL){
+                parr = new bool[dsize][dsize];
         }
         memset(parr, false, dsize*dsize*sizeof(bool));
         
-        for(auto body: this.bodies){
-                int x = body.p.x/uargs.size*dsize;
-                int y = body.p.x/uargs.size*dsize;
+        for(int i = 0; i < uargs.num_bodies; i++){
+                int x = bodies[i].p.x/uargs.size*dsize;
+                int y = bodies[i].p.x/uargs.size*dsize;
                 to_image[x%dsize][y%dsize] = true;
         }
-        to_image(parr, dsize, filename);
+        to_image(parr, dsize, dargs.filename);
 }

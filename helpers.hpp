@@ -1,5 +1,13 @@
-RVec mix_rvecs(RVec * rvecs, int n);
-void to_image(bool [][] img, int n, string filename);
-Vec rand_vec(void);
+#ifndef HELPERS
+#define HELPERS
+
+#include <string>
+#include "structures.hpp"
+
+RandomVec mix_rvecs(std::vector<RandomVec> rvecs);
+void to_image(std::vector<std::vector<bool>> img, int n, string filename);
+Vec rand_vec();
 Real distance(Vec pos1, Vec pos2);
 Real lat_dist(Vec pos1, Vec pos2, Real lattice);
+
+#endif

@@ -1,5 +1,14 @@
+#ifndef DEFINITIONS
+#define DEFINITIONS
+
 #define Real float
 #define CReal const real
 #define CSeed true
-#define M vec_x_real
-#define P vec_plus_equal
+
+#include <cstdio>
+#include <cmath>
+#include <cstdlib> 
+#include <ctime>
+#include <string>
+
+#endif
