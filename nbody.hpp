@@ -11,8 +11,9 @@ class NBody {
         void build_qtree();
         void leapfrog();
         void step();
-        Vec accel_body(Body B);
-        std::vector<Vec> accelerations();
+        Vec accel_body_body(Body B0, Body B1);
+        Vec accel_body_all(Body B);
+        std::vector<Vec> accel_all_all();
     public:
         NBody(CReal density = 1E-26, //kg*m^-3
               CReal size = 5E+23, //m

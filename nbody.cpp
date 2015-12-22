@@ -3,6 +3,7 @@
 
 //helper functions
 
+//rewrite
 void group_bodies(Rect rect, std::vector<Body> bodies, int n, 
                   std::array<Rect,4> rects, std::array<std::vector<Body>,4> groups, std::array<int,4> ns){
         //init rects
@@ -29,6 +30,7 @@ void group_bodies(Rect rect, std::vector<Body> bodies, int n,
         }
 }
 
+//rewrite
 Tree built_qtree_r(Rect rect, std::vector<Body> bodies, int n){
         std::vector<Tree> tree_children;
         Node node = {.rect = rect};
@@ -61,96 +63,71 @@ Tree built_qtree_r(Rect rect, std::vector<Body> bodies, int n){
         return tree;
 }
 
-Vec NBody::p_accel(Vec p1, Vec p2, Real mass, Real distance){
-        Real mag_accel = uargs.gconst*mass/(distance*distance+plummer*plummer);
-        Real dir_accel = atan2(p2.y-p1.y, p2.x-p1.x);
-        return {acc*cos(dir_accel), acc*sin(dir_accel)};
+Vec pp_acceleration(dp, mass = 1, G = 1, plummer = 0){
+    Real distancesq = dp.norm_sq()
+    Real distance = std::sqrt(distancesq);
+    Real mag_accel = G*mass/(distancesq+plummer*plummer);
+    return dp*(mag_accel/distance);
 }
 
-Vec NBody::grid_accel(Vec pos){
-        Vec accel = {0,0};
-        int lat = uargs.lattice;
-        //find all csom and distances
-        std::vector<Vec> CsOM (lat*lat);
-        std::vector<Real> distances (lat*lat);
-        for(int x = -lat; i <= lat; i++){
-                for(y = -lat; y <= lat; y++){
-                        int index = x*lat+y;
-                        Vec Com = {x*size, y*size};
-                        CsOM[index] = COM;
-                        distances[index] = distance(pos, COM);
+std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
+    <std::vector<std::vector<Vec>> field (resolution, std::vector<Vec> (resolution, {0,0}));
+    for(int i = 0; i < resolution; i++){
+        for(int j = 0; j < resolution; j++){
+            for(int n = -tiling, n <= tiling, n++){
+                for(int m = -tiling, m <= tiling, m++){
+                    Vec p = {(i+0.5)/resolution+n,
+                             (j+0.5)/resolution+m};
+                    field[i][j] += pp_acceleration(p);
                 }
+            }
         }
-        //compute acceleration
-        for(int i = 0; i < lat*lat; i++){
-                if(distances[i]*lattice < size){
-                        accel.P(p_accel(pos, CsOM[i], 1, distances[i]));
-                }
-        }
-        return accel;
+    }
+    return field;
+}
+
+Vec NBody::accel_body_body(Body B0, Body B1){
+    Vec dp = B1.p-B0.p;
+    if(dp.norm_sq() > this->grid_limit*this->uargs.size/this->force_field.size()){
+        Vec indices = dp*(force_field.size()/this->uargs.size);
+        return this->force_field[indices.x][indices.y];
+    } else {
+        return pp_acceleration(dp, this->sargs.mass, this->uargs.gconst, this->uargs.plummer);
+    }
 }
 
 //rewrite
-<std::vector<std::vector<Vec>> NBody::GP_field(int mesh, REAL size){
-        Real spacing = size/mesh;
-        <std::vector<std::vector<Vec>> field (mesh, mesh);
-        for(int i = 0; i < lattice; i++){
-                for(int j = 0; j < lattice; j++){
-                        Real px = (i+0.5)*spacing;
-                        Real py = (j+0.5)*spacing;
-                        field[i][j] = grid_accel({px,py});
-                }
+Vec NBody::accel_body_all(Body B){
+    Vec accel = {0,0};
+    //rewrite with std::stack instead of tree_stack
+    std::stack<Node> BFSstack;
+    BFSstack.push()
+    static Tree_stack BFSS = {0, Tree[uargs.nbody]};
+    BFSS.add(quadtree);
+    while(BFSS.n){
+        tree = BFSS.pop();
+        Real lattice_dist = lat_dist(bodies[i].p, tree.center.var, uargs.size);
+        if(tree.node.body != NULL && tree.node.body->id == id){
+            continue;
+        } else if (tree.node.center.var == 0 || lattice_dist/sqrt(tree.center.var) > QTR){
+            accel.P(lattice_accel(bodies[i].p, tree.node.center, lattice_dist));
+        } else {
+            for(int i = 0; i < tree.num_child; i++){
+                BFSS.add(tree.trees[i]);
+            }
         }
-        return field;
+    }
+    return accel;
 }
 
-//rewrite
-void NBody::init_field(){
-        field = GP_field(uargs.mesh, uargs.size);
-}
-
-//what's this?
-Vec NBody::pbc_accel(Vec pos, RVec center, Real lattice_dist){
-        //rewrite with mesh
-        Vec accel = {0,0};
-        //if close
-                //call p_accel
-        //else
-                //call grid_accel
-}
-
-//rewrite
-Vec NBody::body_accel(int id){
-        //don't use id
-        Vec accel = {0,0};
-        //rewrite with std::stack instead of tree_stack
-        static Tree_stack BFSS = {0, Tree[uargs.nbody]};
-        BFSS.add(quadtree);
-        while(BFSS.n){
-                tree = BFSS.pop();
-                Real lattice_dist = lat_dist(bodies[i].p, tree.center.var, uargs.size);
-                if(tree.node.body != NULL && tree.node.body->id == id){
-                        continue;
-                } else if (tree.node.center.var == 0 || 
-                           lattice_dist/sqrt(tree.center.var) > QTR){
-                        accel.P(lattice_accel(bodies[i].p, tree.node.center, lattice_dist));
-                } else {
-                        for(int i = 0; i < tree.num_child; i++){
-                                BFSS.add(tree.trees[i]);
-                        }
-                }
-        }
-        return accel;
-}
-
-std::vector<Vec> NBody::accelerations(){ 
-        static std::vector<Vec> accs (this->bodies.size());
-        int i = 0;
-        for(auto body: this->bodies){
-            accs[i] = body_accel(body);
-            i++;
-        }
-        return accs;
+std::vector<Vec> NBody::accel_all_all(){ 
+    static std::vector<Vec> accs (this->bodies.size());
+    int i = 0;
+    for(auto body: this->bodies){
+        accs[i] = body_accel(body);
+        i++;
+    }
+    return accs;
 }
 
 std::vector<Body> initialbodies(int n, Real size, Real mass, Real displacement_ratio, Real max_vel){
@@ -191,7 +168,7 @@ NBody::NBody(CReal density = 1E-26, //kg*m^-3
     universe_args uargs = {initsize, hubble, plummer, gravity};
     simulation_args sargs = {QTR, lattice, mass, simtime, timestep, gridlimit, filename, drawsize};
     std::vector<Body> bodies = initialbodies(num_bodies, initsize, mass, displacement, max_velocity);
-    std::vector<std::vector<Real>> forcefield = init_field(resolution, tiling);
+    std::vector<std::vector<Vec>> forcefield = init_field(resolution, tiling);
     return {.bodies = bodies, .uargs = uargs, .sargs = sargs, .force_field = forcefield};
 }
 

@@ -8,8 +8,9 @@
 struct Vec {
         Real x;
         Real y;
-        void operator +(Vec v);
+        void operator +=(Vec v);
         Vec operator *(Real scalar);
+        Vec operator -(Vec v);
         Real norm_sq();
 };
 typedef struct Vec Vec;

@@ -10,6 +10,10 @@ Vec operator *(Real scalar){
     return {this->x*scalar, this->y*scalar};
 }
 
+Vec operator -(Vec v){
+    return {v.x-this->x, v.y-this->y};
+}
+
 Real Vec::norm_sq(){
     return pow(this->x,2)+pow(this->y,2);
 }
