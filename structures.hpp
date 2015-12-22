@@ -47,7 +47,7 @@ struct Tree {
 };
 typedef struct Tree Tree;
 
-struct UniverseArgs {
+struct universe_args {
     Real size;
     Real hubble;
     Real plummer;
@@ -55,15 +55,17 @@ struct UniverseArgs {
 };
 typedef struct UArgs UArgs;
 
-struct SimulationArgs {
+struct simulation_args {
     Real QTR;
     Real lattice;
     int num_bodies;
     int body_mass;
     Real simtime;
     Real timestep;
+    int grid_limit;
     string filename;
+    int drawsize;
 };
-typedef struct SimulationArgs SimulationArgs
+typedef struct simulation_args simulation_args
 
 #endif

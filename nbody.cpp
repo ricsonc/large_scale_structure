@@ -61,32 +61,7 @@ Tree built_qtree_r(Rect rect, std::vector<Body> bodies, int n){
         return tree;
 }
 
-void NBody::metric_expansion(Real dt){
-        Real ratio = 1+hubble*dt;
-        uargs.size *= ratio;
-        for(int i = 0; i < num_bodies; i++){
-                bodies[i].p = bodies[i].p.M(ratio);
-        }
-}
 
-void NBody::border_wrap(){
-        for(int i = 0; i < num_bodies; i++){
-                bodies[i].p.x = fmod(bodies[i].p.x, uargs.size);
-                bodies[i].p.y = fmod(bodies[i].p.y, uargs.size);
-        }
-}
-
-void NBody::build_qtree(){
-        return build_qtree_r({{0,0},{size,size}}, bodies, uargs.numbodies);
-}
-
-void NBody::leapfrog(Real dt){
-        std::vector<Vec> accs = accelerations();
-        for(int i = 0; i < num_bodies; i++){
-                bodies[i].p.P(bodies[i].v.M(dt)); 
-                bodies[i].v.P(accs[i].M(dt));
-        }
-}
 
 Vec NBody::p_accel(Vec p1, Vec p2, Real mass, Real distance){
         Real mag_accel = uargs.gconst*mass/(distance*distance+plummer*plummer);
@@ -167,46 +142,118 @@ Vec NBody::body_accel(int id){
 }
 
 std::vector<Vec> NBody::accelerations(){ 
-        static std::vector<Vec> accs (this.bodies.size());
-        for(std::size_t i = 0; i < this.bodies.size(); i++){
+        static std::vector<Vec> accs (this->bodies.size());
+        for(std::size_t i = 0; i < this->bodies.size(); i++){
                 accs[i] = body_accel(i);
         }
         return accs;
 }
 
-void NBody::step(){
-        build_qtree();
-        leapfrog();
-        border_wrap();
-        metric_expansion();
-        if(this.dargs != NULL){
-                draw(this.dargs);
+std::vector<Body> initialbodies(int n, Real size, Real mass, Real displacement_ratio, Real max_vel){
+    std::vector<Body> bodies (n);
+    const int side = sqrt(n);
+    const Real radius = size/side;
+    for(int i = 0; i < side; i++){
+        for(int j = 0; j < side; j++){
+            d_vector = rand_vec();
+            displacement = d_vector*displacement_ratio;
+            vel_displacement = d_vector*max_vel;
+            Vec p = {i+displacement.x, j+displacement.y};
+            bodies[i*side+j] = {index, mass, p*radius, vel_displacement};
         }
+    }
+    return bodies;
+}
+
+//below ok
+
+NBody::NBody(CReal density = 1E-26, //kg*m^-3
+             CReal size = 5E+23, //m
+             CReal plummer = 5E+21, //m
+             CReal gravity = 6.67E-11, //m^3*kg^-1*s^-2
+             CReal hubble = 2.25E-18, //s^-1
+             CReal simtime = 5E+17, //s
+             CReal timestep = 5E+14, //s
+             CReal QTR = 3,
+             const int resolution = 1024,
+             const int tilings = 15,
+             const int grid_limit = 8,
+             const int num_bodies = 4096,
+             const int drawsize = 1024,
+             CReal displacement = 0.2,
+             CReal max_velocity = 1E+5, //m*s^-1
+             string filename = "")
+{
+    CReal initsize = size*exp(-hubble*simtime) //m
+    CReal mass = pow(size, 3)*density/bodies; //kg
+    universe_args uargs = {initsize, hubble, plummer, gravity};
+    simulation_args sargs = {QTR, lattice, mass, simtime, timestep, gridlimit, filename, drawsize};
+    std::vector<Body> bodies = initialbodies(num_bodies, initsize, mass, displacement, max_velocity);
+    std::vector<std::vector<Real>> forcefield = compute_forcefield(resolution, tiling);
+    return {.bodies = bodies, .uargs = uargs, .sargs = sargs, .force_field = forcefield};
+}
+
+void NBody::metric_expansion(){
+    Real ratio = 1+hubble*this->simulation_args.timestep;
+    this->universe_args.size *= ratio;
+    for(auto body: bodies){
+        body.p = body.p*ratio;
+    }
+}
+
+void NBody::border_wrap(){
+        for(auto body: this->bodies){
+                body.p.x = fmod(body.p.x, this->universe_args.size);
+                body.p.y = fmod(body.p.y, this->universe_args.size);
+        }
+}
+
+void NBody::build_qtree(){
+        return build_qtree_r({{0,0},{this->universe_args.size,this->universe_args.size}}, this->bodies);
+}
+
+void NBody::leapfrog(){
+        std::vector<Vec> accs = accelerations();
+        int i = 0;
+        for(auto body: this->bodies){
+            body.p += body.v*this->simulation_args.timestep;
+            body.v += accs[i]*this->simulation_args.timestep;
+            i++;
+        }
+}
+
+void NBody::step(){
+    build_qtree();
+    leapfrog();
+    border_wrap();
+    metric_expansion();
+    if(this->dargs != NULL){
+        draw(this->dargs);
+    }
 }
 
 void NBody::simulate(verbose = True){
-        for(int i = 0; i < this.simtime/this.timestep; i++){
-                if(verbose){
-                        printf("%f\n", dt*i);
-                }
-                step(this.timestep, {simname+to_string(i)});
+    for(int i = 0; i < this->simtime/this->timestep; i++){
+        if(verbose){
+            printf("%f\n", dt*i);
         }
+        step(this->timestep, {simname+to_string(i)});
+    }
 }
 
 void NBody::draw(string filename){
-        Real dsize = this.dargs.size;
-        static bool init = true;
-        static std::vector<bool> pixelarr;
-        if(init){
-                pixelarr = new bool[dsize][dsize];
-                init = false;
-        }
-        memset(parr, false, dsize*dsize*sizeof(bool));
-        
-        for(auto body: this.bodies){
-                int x = body.p.x/uargs.size*dsize;
-                int y = body.p.x/uargs.size*dsize;
-                to_image[x%dsize][y%dsize] = true;
-        }
-        to_image(parr, dsize, filename);
+    Real dsize = this->dargs.size;
+    static bool init = true;
+    static std::vector<bool> pixelarr;
+    if(init){
+        pixelarr = new bool[dsize][dsize];
+        init = false;
+    }
+    memset(parr, false, dsize*dsize*sizeof(bool));
+    for(auto body: this->bodies){
+        int x = body.p.x/uargs.size*dsize;
+        int y = body.p.x/uargs.size*dsize;
+        to_image[x%dsize][y%dsize] = true;
+    }
+    to_image(parr, dsize, filename);
 }
