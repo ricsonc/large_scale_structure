@@ -38,7 +38,6 @@ typedef struct Body Body;
 struct Node {
     Rect rect;
     RandomVec center;
-    Body *body;
 };
 typedef struct Node Node;
 
