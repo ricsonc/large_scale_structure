@@ -3,7 +3,7 @@
 
 class NBody {
     private:
-        Tree *quadtree;
+        Tree quadtree;
         std::vector<std::vector<Vec>> force_field;
         void init_field();
         void metric_expansion();
@@ -11,7 +11,7 @@ class NBody {
         void build_qtree();
         void leapfrog();
         void step();
-        Vec accel_body_body(Body B0, Body B1);
+        Vec accel_body_point(Body B, Vec P, Real mass);
         Vec accel_body_all(Body B);
         std::vector<Vec> accel_all_all();
     public:

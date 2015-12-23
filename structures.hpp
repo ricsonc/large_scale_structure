@@ -6,41 +6,47 @@
 #include <string>
 
 struct Vec {
-        Real x;
-        Real y;
-        void operator +=(Vec v);
-        Vec operator *(Real scalar);
-        Vec operator -(Vec v);
-        Real norm_sq();
+    Real x;
+    Real y;
+    void operator +=(Vec v);
+    Vec operator *(Real scalar);
+    Vec operator -(Vec v);
+    Real norm_sq();
 };
 typedef struct Vec Vec;
 
 struct RandomVec {
-        Vec vec;
-        Real var;
-        Real weight;
+    Vec vec;
+    Real var;
+    Real weight;
 };
 typedef struct RVec RVec;
 
 struct Rect {
-        Vec pos0;
-        Vec pos1;
-        bool contains(Vec pos);
+    Vec pos0;
+    Vec pos1;
+    bool contains(Vec pos);
 };
 typedef struct Rect Rect;
 
 struct Body {
-        Vec p;
-        Vec v;
+    Vec p;
+    Vec v;
 };
 typedef struct Body Body;
 
 struct Node {
-        Rect rect;
-        RandomVec center;
-        Body *body;
+    Rect rect;
+    RandomVec center;
+    Body *body;
 };
 typedef struct Node Node;
+
+struct RTree {
+    std::multimap<Node, Node> map;
+    Node root;
+};
+typedef struct RTree Rtree;
 
 struct universe_args {
     Real size;

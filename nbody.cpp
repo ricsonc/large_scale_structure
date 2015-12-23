@@ -17,7 +17,7 @@ std::array<Rect, 4> split_rect(Rect rect){
 
 void qtree(Node root, std::vector<Body> &bodies, std::multiset<Node, Node> &QT){
     if(bodies.size() == 1){
-        root.body = bodies[0];
+        root.body = &bodies[0];
         root.center = {root.body.p,0,1};
         return;
     }
@@ -31,14 +31,14 @@ void qtree(Node root, std::vector<Body> &bodies, std::multiset<Node, Node> &QT){
             }
         }
         if(quadrant.size()){
-            Node child = {.rect = rect};
-            build_qtree(child, quadrant, QT);
+            //why doesn't this child get destroyed out of scope?
+            Node child = qtree({.rect = rect, .body = NULL}, quadrant, QT);
             centers.push_back(child.center);
             QT.insert(pair<Node, Node>(root, child));
         }
     }
     root.center = mix_rvecs(centers);
-    return;
+    return root;
 }
 
 Vec pp_acceleration(dp, mass = 1, G = 1, plummer = 0){
@@ -64,37 +64,31 @@ std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
     return field;
 }
 
-Vec NBody::accel_body_body(Body B0, Body B1){
-    Vec dp = B1.p-B0.p;
+Vec NBody::accel_body_point(Body B, Vec P, Real mass){
+    Vec dp = P-B.p;
     if(dp.norm_sq() > this->grid_limit*this->uargs.size/this->force_field.size()){
         Vec indices = dp*(force_field.size()/this->uargs.size);
         return this->force_field[indices.x][indices.y];
+        //scale this for mass, distance, and mass again!
     } else {
-        return pp_acceleration(dp, this->sargs.mass, this->uargs.gconst, this->uargs.plummer);
+        return pp_acceleration(dp, this->sargs.mass*mass, this->uargs.gconst, this->uargs.plummer);
     }
 }
 
-//rewrite
 Vec NBody::accel_body_all(Body B){
-    Vec accel = {0,0};
-    //rewrite with std::stack instead of tree_stack
-    std::stack<Node> BFSstack;
-    BFSstack.push()
-    static Tree_stack BFSS = {0, Tree[uargs.nbody]};
-    BFSS.add(quadtree);
-    while(BFSS.n){
-        tree = BFSS.pop();
-        Real lattice_dist = lat_dist(bodies[i].p, tree.center.var, uargs.size);
-        if(tree.node.body != NULL && tree.node.body->id == id){
-            continue;
-        } else if (tree.node.center.var == 0 || lattice_dist/sqrt(tree.center.var) > QTR){
-            accel.P(lattice_accel(bodies[i].p, tree.node.center, lattice_dist));
+    accel = {0,0};
+    std::queue<Node> DFSQ;
+    DFSQ.push(this->quadtree.root);
+    while(!DFSQ.empty()){
+        child = DFSQ.pop();       
+        Real distance = lattice_dist(B.p, child.center.vec, this->uargs.size);
+        if(distance large enough){
+            accel += accel_body_point(B, child.center.vec, child.center.mass);
         } else {
-            for(int i = 0; i < tree.num_child; i++){
-                BFSS.add(tree.trees[i]);
+            for(){
+                DFSQ.push();
             }
         }
-    }
     return accel;
 }
 
@@ -167,7 +161,8 @@ void NBody::border_wrap(){
 
 void NBody::build_qtree(){
     std::multimap<Node, Node> QT;
-    return qtree({{0,0},{this->uargs.size,this->uargs.size}}, this->bodies, QT);
+    Node root = qtree({.rect = {{0,0},{this->uargs.size,this->uargs.size}}, .body = NULL}, this->bodies, QT);
+    self.quadtree = {QT, root};
 }
 
 void NBody::leapfrog(){
