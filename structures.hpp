@@ -42,10 +42,10 @@ struct Node {
 typedef struct Node Node;
 
 struct RTree {
-    std::multimap<Node, Node> map;
+    std::multimap<Node, Node> mmap;
     Node root;
 };
-typedef struct RTree Rtree;
+typedef struct RTree RTree;
 
 struct universe_args {
     Real size;

@@ -83,7 +83,7 @@ Vec NBody::accel_body_all(Body B){
         if(child.center.var == 0 || distance/std::sqrt(child.center.var) > this->sargs.QTR){
             accel += accel_body_point(B, child.center.vec, child.center.mass);
         } else {
-            auto range = this->quadtree.map.equal_range(child);
+            auto range = this->quadtree.mmap.equal_range(child);
             for(auto it = range.first, it != range.second, ++it){
                 DFSQ.push(*it);
             }
