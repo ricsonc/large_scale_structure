@@ -1,6 +1,10 @@
 #ifndef NBODY
 #define NBODY
 
+#include "structures.hpp"
+#include <string>
+#include "definitions.hpp"
+
 class NBody {
     private:
         Node quadtree;

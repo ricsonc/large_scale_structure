@@ -1,5 +1,4 @@
 #include "structures.hpp"
-#include "definitions.hpp"
 
 Vec operator +=(Vec v){
     this->x += v.x;

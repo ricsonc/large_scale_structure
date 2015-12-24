@@ -1,5 +1,5 @@
+#include "nbody.hpp"
 #include "helpers.hpp"
-#include "structures.hpp"
 
 std::array<Rect, 4> split_rect(Rect rect){
         Real minx = rect.pos0.x;
