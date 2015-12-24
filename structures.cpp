@@ -1,15 +1,15 @@
 #include "structures.hpp"
 
-Vec operator +=(Vec v){
+Vec Vec::operator +=(Vec v){
     this->x += v.x;
     this->y += v.y;
 }
 
-Vec operator *(Real scalar){
+Vec Vec::operator *(Real scalar){
     return {this->x*scalar, this->y*scalar};
 }
 
-Vec operator -(Vec v){
+Vec Vec::operator -(Vec v){
     return {v.x-this->x, v.y-this->y};
 }
 

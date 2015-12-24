@@ -34,7 +34,7 @@ class NBody {
               const int drawsize = 1024,
               CReal displacement = 0.2,
               CReal max_velocity = 1E+5, //m*s^-1
-              string filename = "");
+              std::string filename = "");
         std::vector<Body> bodies;
         universe_args uargs;
         simulation_args sargs;

@@ -48,7 +48,7 @@ struct universe_args {
     Real plummer;
     Real gconst;
 };
-typedef struct UArgs UArgs;
+typedef struct universe_args UArgs;
 
 struct simulation_args {
     Real QTR;
@@ -58,9 +58,9 @@ struct simulation_args {
     Real simtime;
     Real timestep;
     int grid_limit;
-    string filename;
+    std::string filename;
     int drawsize;
 };
-typedef struct simulation_args simulation_args
+typedef struct simulation_args SArgs;
 
 #endif

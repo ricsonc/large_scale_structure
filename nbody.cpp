@@ -131,7 +131,7 @@ NBody::NBody(CReal density = 1E-26, //kg*m^-3
              const int drawsize = 1024,
              CReal displacement = 0.2,
              CReal max_velocity = 1E+5, //m*s^-1
-             string filename = "")
+             std::string filename = "")
 {
     CReal initsize = size*exp(-hubble*simtime) //m
     CReal mass = pow(size, 3)*density/bodies; //kg
@@ -190,7 +190,7 @@ void NBody::simulate(verbose = True){
     }
 }
 
-void NBody::draw(string filename){
+void NBody::draw(std::string filename){
     Real dsize = this->dargs.size;
     static bool init = true;
     static std::vector<bool> pixelarr;
