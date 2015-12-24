@@ -20,29 +20,30 @@ RandomVec mix_rvecs(std::vector<RandomVec> &rvecs){
 }
 
 void to_image(std::vector<std::vector<bool>> &img, std::string filename){
-        std::vector<char> outstring (2*pow(img.size(),2));
-        for(std::size_t i = 0; i < img.size(); i++){
+        size_t n = img.size();
+        std::vector<char> outstring (2*n*n);
+        for(std::size_t i = 0; i < n; i++){
                 for(std::size_t j = 0; j < img.size(); j++){
-                        int index = i*n+j;
+                        int index = i*img.size()+j;
                         outstring[index*2] = img[i][j] ? '1' : '0';
                         outstring[index*2+1] = (j+1 == n) ? '\n' : ' ';
                 }
         }
-        std::string nstring = std::to_string(img.size());
+        std::string nstring = std::to_string(n);
         std::string header = "P1\n" + nstring + " " + nstring + "\n";
-        FILE * f = fopen(filename, "w");
-        fwrite(&header, header.length(), f);
-        fwrite(outstring, 2*n*n, f);
-        fclose(f);
+        FILE * f = std::fopen(filename.c_str(), "w");
+        std::fwrite(&header, header.length(), 1, f);
+        std::fwrite(&outstring, outstring.size(), 1, f);
+        std::fclose(f);
 }
 
 Real unit_rand(){
-    return (Real)rand()/(Real)rand_max();
+    return (Real)rand()/(Real)RAND_MAX;
 }
 
 
 Vec rand_vec(){
-    return vec = {unit_rand(), unit_rand()};
+    return {unit_rand(), unit_rand()};
 }
 
 Real distance(Vec pos1, Vec pos2){
@@ -56,7 +57,7 @@ Real periodic_dist(Vec pos1, Vec pos2, Real size){
     Real dy_inner = abs(pos2.y - pos2.y);
     Real dx_outer = size-dx_inner;
     Real dy_outer = size-dy_inner;
-    Real dx = min(dx_inner,dx_outer);
-    Real dy = min(dy_inner,dy_outer);
+    Real dx = std::min(dx_inner,dx_outer);
+    Real dy = std::min(dy_inner,dy_outer);
     return sqrt(dx*dx+dy*dy);
 }

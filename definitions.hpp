@@ -1,9 +1,9 @@
 #ifndef DEFINITIONS
 #define DEFINITIONS
 
-#define Real float
-#define CReal const Real
 #define CSeed true
+
+typedef double Real;
 
 #include <cstdio>
 #include <cmath>
@@ -12,5 +12,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <stack>
+#include <cstdbool>
 
 #endif

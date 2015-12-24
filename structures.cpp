@@ -1,6 +1,6 @@
 #include "structures.hpp"
 
-Vec Vec::operator +=(Vec v){
+void Vec::operator +=(Vec v){
     this->x += v.x;
     this->y += v.y;
 }

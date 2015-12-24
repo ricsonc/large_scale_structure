@@ -6,7 +6,7 @@
 int main()
 {
     srand(CSeed ? 0 : time(NULL));
-    NBody universe = NBody(filename = "filament_simulation");
+    NBody universe = NBody("filament_simulation");
     universe.simulate();
 }
 

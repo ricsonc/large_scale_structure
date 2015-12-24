@@ -52,9 +52,7 @@ typedef struct universe_args UArgs;
 
 struct simulation_args {
     Real QTR;
-    Real lattice;
-    int num_bodies;
-    int body_mass;
+    Real body_mass;
     Real simtime;
     Real timestep;
     int grid_limit;
