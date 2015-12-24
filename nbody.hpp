@@ -3,7 +3,7 @@
 
 class NBody {
     private:
-        Tree quadtree;
+        Node quadtree;
         std::vector<std::vector<Vec>> force_field;
         void init_field();
         void metric_expansion();

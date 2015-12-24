@@ -3,7 +3,7 @@
 #include "definitions.h"
 #include <string>
 
-RandomVec mix_rvecs(std::vector<RandomVec> rvecs){
+RandomVec mix_rvecs(std::vector<RandomVec> &rvecs){
         Real sum_weights = 0;
         Vec mean_vec = {0,0};
         Real sum_var = 0;
@@ -21,7 +21,7 @@ RandomVec mix_rvecs(std::vector<RandomVec> rvecs){
         return {mean_vec, sum_var, sum_weights};
 }
 
-void to_image(std::vector<std::vector<bool>> img, string filename){
+void to_image(std::vector<std::vector<bool>> &img, string filename){
         std::vector<char> outstring (2*pow(img.size(),2));
         for(std::size_t i = 0; i < img.size(); i++){
                 for(std::size_t j = 0; j < img.size(); j++){
@@ -54,11 +54,11 @@ Real distance(Vec pos1, Vec pos2){
     return sqrt(dx*dx+dy*dy);
 }
 
-Real lat_dist(Vec pos1, Vec pos2, Real lattice){
+Real periodic_dist(Vec pos1, Vec pos2, Real size){
     Real dx_inner = abs(pos1.x - pos2.x);
     Real dy_inner = abs(pos2.y - pos2.y);
-    Real dx_outer = lattice-dx_inner;
-    Real dy_outer = lattice-dy_inner;
+    Real dx_outer = size-dx_inner;
+    Real dy_outer = size-dy_inner;
     Real dx = min(dx_inner,dx_outer);
     Real dy = min(dy_inner,dy_outer);
     return sqrt(dx*dx+dy*dy);

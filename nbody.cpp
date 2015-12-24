@@ -15,10 +15,10 @@ std::array<Rect, 4> split_rect(Rect rect){
                 {{midx,midy},rect.pos1}};
 }
 
-void qtree(Node root, std::vector<Body> &bodies, std::multiset<Node, Node> &QT){
+Node qtree(Node root, std::vector<Body> &bodies){
     if(bodies.size() == 1){
         root.center = {bodies[0].p,0,1};
-        return;
+        return root;
     }
     std::array<Rect,4> rects = split_rect(root.rect);
     std::vector<Rvec> centers;
@@ -30,9 +30,9 @@ void qtree(Node root, std::vector<Body> &bodies, std::multiset<Node, Node> &QT){
             }
         }
         if(quadrant.size()){
-            Node child = qtree({.rect = rect}, quadrant, QT);
+            Node child = qtree({.rect = rect}, quadrant);
             centers.push_back(child.center);
-            QT.insert(pair<Node, Node>(root, child));
+            root.children.push_back(std::unique_ptr<Node> (child));
         }
     }
     root.center = mix_rvecs(centers);
@@ -73,19 +73,18 @@ Vec NBody::accel_body_point(Body B, Vec P, Real mass){
     return accel*this->sargs.mass*mass*this->uargs.gconst;
 }
 
-Vec NBody::accel_body_all(Body B){
+Vec NBody::accel_body_all(Body &B){
     accel = {0,0};
-    std::queue<Node> DFSQ;
-    DFSQ.push(this->quadtree.root);
-    while(!DFSQ.empty()){
-        child = DFSQ.pop();
-        Real distance = lattice_dist(B.p, child.center.vec, this->uargs.size);
-        if(child.center.var == 0 || distance/std::sqrt(child.center.var) > this->sargs.QTR){
-            accel += accel_body_point(B, child.center.vec, child.center.mass);
+    std::stack<std::experimental::observer_ptr<Node>> DFSS;
+    DFSS.push(std::experimental::observer_ptr<Node> (this->quadtree.root));
+    while(!DFSS.empty()){
+        child = DFSS.pop();
+        Real distance = periodic_dist(B.p, *child.center.vec, this->uargs.size);
+        if(*child.center.var == 0 || distance/std::sqrt(*child.center.var) > this->sargs.QTR){
+            accel += accel_body_point(B, *child.center.vec, *child.center.mass);
         } else {
-            auto range = this->quadtree.mmap.equal_range(child);
-            for(auto it = range.first, it != range.second, ++it){
-                DFSQ.push(*it);
+            for(auto neighbor: *child.children){
+                DFSQ.push(std::experimental::observer_ptr<Node> (neighbor));
             }
         }
     return accel;
@@ -159,9 +158,7 @@ void NBody::border_wrap(){
 }
 
 void NBody::build_qtree(){
-    std::multimap<Node, Node> QT;
-    Node root = qtree({.rect = {{0,0},{this->uargs.size,this->uargs.size}}}, this->bodies, QT);
-    self.quadtree = {QT, root};
+    self.quadtree = ({.rect = {{0,0},{this->uargs.size,this->uargs.size}}}, this->bodies)
 }
 
 void NBody::leapfrog(){

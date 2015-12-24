@@ -3,7 +3,7 @@
 #include "structures.hpp"
 #include "definitions.hpp"
 
-int main(int argc, char **argv)
+int main()
 {
     srand(CSeed ? 0 : time(NULL));
     NBody universe = NBody(filename = "filament_simulation");

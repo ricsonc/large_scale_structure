@@ -38,14 +38,9 @@ typedef struct Body Body;
 struct Node {
     Rect rect;
     RandomVec center;
+    std::vector<std::unique_ptr<Node>> children;
 };
 typedef struct Node Node;
-
-struct RTree {
-    std::multimap<Node, Node> mmap;
-    Node root;
-};
-typedef struct RTree RTree;
 
 struct universe_args {
     Real size;
