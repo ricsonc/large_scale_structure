@@ -11,6 +11,8 @@ struct Vec {
     void operator +=(Vec v);
     Vec operator *(Real scalar);
     Vec operator -(Vec v);
+    void operator %=(Real scalar);
+    Vec operator %(Real scalar);
     Real norm_sq();
 };
 typedef struct Vec Vec;

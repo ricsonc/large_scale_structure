@@ -70,14 +70,17 @@ std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
 }
 
 Vec NBody::accel_body_point(Body B, Vec P, Real mass){
-    Vec dp = P-B.p;
+    Vec dp = (P-B.p)%uargs.size;
     Vec accel;
     size_t n = this->force_field.size();
     if(dp.norm_sq() > sargs.grid_limit*uargs.size/n){
         Vec indices = dp*(force_field.size()/uargs.size);
-        accel = this->force_field[posfmod(indices.x,n)][posfmod(indices.y,n)]*pow(uargs.size,-2);
+        accel = this->force_field[(int)indices.x][(int)indices.y]*pow(uargs.size,-2);
     } else {
-        accel = pp_acceleration(dp, uargs.plummer);
+        Real xu = dp.x-uargs.size;
+        Real yu = dp.y-uargs.size;
+        Vec close = {dp.x < -xu ? dp.x : xu, dp.y < -yu ? dp.y : yu};
+        accel = pp_acceleration(close, uargs.plummer);
     }
     return accel*sargs.body_mass*mass*uargs.gconst;
 }
@@ -163,8 +166,7 @@ void NBody::metric_expansion(){
 
 void NBody::border_wrap(){
     for(Body &body: this->bodies){
-        body.p.x = fmod(body.p.x, uargs.size);
-        body.p.y = fmod(body.p.y, uargs.size);
+        body.p %= uargs.size;
     }
 }
 
@@ -182,20 +184,16 @@ void NBody::leapfrog(){
     }
 }
 
-void NBody::step(){
-    build_qtree();
-    leapfrog();
-    border_wrap();
-    metric_expansion();
-    draw();
-}
-
 void NBody::simulate(bool verbose){
     for(int i = 0; i < sargs.simtime/sargs.timestep; i++){
         if(verbose){
-            printf("frame: %d, time: %f\n", ioargs.frame_num, sargs.timestep*i);
+            printf("frame: %d, time: %.3e\n", ioargs.frame_num, sargs.timestep*i);
         }
-        step();
+        build_qtree();
+        leapfrog();
+        border_wrap();
+        metric_expansion();
+        draw();
         ioargs.frame_num++;
     }
 }
@@ -207,8 +205,8 @@ void NBody::draw(){
     }
     std::vector<std::vector<bool>> pixelarr (dsize, std::vector<bool> (dsize, true));
     for(Body &body: this->bodies){
-        int x = body.p.x/uargs.size*dsize;
-        int y = body.p.y/uargs.size*dsize;
+        size_t x = body.p.x/uargs.size*dsize;
+        size_t y = body.p.y/uargs.size*dsize;
         pixelarr[x][y] = false;
     }
     to_image(pixelarr, ioargs.filename+"/"+std::to_string(ioargs.frame_num)+".ppm");

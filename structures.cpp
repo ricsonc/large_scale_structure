@@ -13,6 +13,20 @@ Vec Vec::operator -(Vec v){
     return {v.x-this->x, v.y-this->y};
 }
 
+Real pfmod(Real x, Real y){
+    return fmod(fmod(x,y)+y,y);
+}
+
+void Vec::operator %=(Real scalar){
+    this->x = pfmod(this->x, scalar);
+    this->y = pfmod(this->y, scalar);
+}
+
+Vec Vec::operator %(Real scalar){
+    return {pfmod(this->x, scalar), pfmod(this->y, scalar)};
+}
+
+
 Real Vec::norm_sq(){
     return pow(this->x,2)+pow(this->y,2);
 }
