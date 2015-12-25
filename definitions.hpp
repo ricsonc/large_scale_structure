@@ -2,7 +2,6 @@
 #define DEFINITIONS
 
 #define CSeed true
-#define _GNU_SOURCE
 
 typedef double Real;
 
@@ -16,8 +15,6 @@ typedef double Real;
 #include <stack>
 #include <cstdbool>
 #include <fstream>
-#include <fenv.h>
-
-feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW  | FE_UNDERFLOW);
+#include <cfenv>
 
 #endif

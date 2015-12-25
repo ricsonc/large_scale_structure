@@ -45,6 +45,9 @@ std::unique_ptr<Node> qtree(Rect rect, std::vector<Body> &bodies){
 
 Vec pp_acceleration(Vec dp, Real plummer = 0){
     Real distancesq = dp.norm_sq();
+    if(distancesq == 0){
+        return {0,0};
+    }
     Real distance = std::sqrt(distancesq);
     Real mag_accel = 1/(distancesq+plummer*plummer);
     return dp*(mag_accel/distance);
@@ -176,9 +179,6 @@ void NBody::leapfrog(){
         body.p += body.v*sargs.timestep;
         body.v += accs[i]*sargs.timestep;
         i++;
-        if(std::isnan(body.p.x) || std::isnan(body.p.y)){
-            break;
-        }
     }
 }
 
