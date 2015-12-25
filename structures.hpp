@@ -1,9 +1,12 @@
 #ifndef STRUCTURES
 #define STRUCTURES
 
-#include "definitions.hpp"
-#include "structures.hpp"
 #include <string>
+#include <vector>
+#include <memory>
+
+#include "common.hpp"
+#include "structures.hpp"
 
 struct Vec {
     Real x;

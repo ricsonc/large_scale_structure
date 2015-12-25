@@ -1,9 +1,11 @@
 #ifndef NBODY
 #define NBODY
 
-#include "structures.hpp"
 #include <string>
-#include "definitions.hpp"
+#include <memory>
+
+#include "common.hpp"
+#include "structures.hpp"
 
 class NBody {
     private:

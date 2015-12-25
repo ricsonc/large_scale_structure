@@ -1,5 +1,10 @@
+#include <cmath>
+#include <cstdbool>
+#include <vector>
+#include <fstream>
+
 #include "helpers.hpp"
-#include "definitions.hpp"
+#include "common.hpp"
 
 RandomVec mix_rvecs(std::vector<RandomVec> &rvecs){
     Real sum_weights = 0;
@@ -50,7 +55,7 @@ Vec rand_vec(){
 Real distance(Vec pos1, Vec pos2){
     Real dx = pos1.x - pos2.x;
     Real dy = pos2.y - pos2.y;
-    return sqrt(dx*dx+dy*dy);
+    return std::sqrt(dx*dx+dy*dy);
 }
 
 Real periodic_dist(Vec pos1, Vec pos2, Real size){
@@ -60,5 +65,5 @@ Real periodic_dist(Vec pos1, Vec pos2, Real size){
     Real dy_outer = size-dy_inner;
     Real dx = std::min(dx_inner,dx_outer);
     Real dy = std::min(dy_inner,dy_outer);
-    return sqrt(dx*dx+dy*dy);
+    return std::sqrt(dx*dx+dy*dy);
 }

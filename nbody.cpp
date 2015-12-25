@@ -1,6 +1,11 @@
+#include <stack>
+#include <memory>
+#include <cmath>
+
 #include "nbody.hpp"
 #include "structures.hpp"
 #include "helpers.hpp"
+#include "common.hpp"
 
 std::array<Rect, 4> split_rect(Rect rect){
         Real minx = rect.pos0.x;

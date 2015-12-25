@@ -1,7 +1,10 @@
+#include <ctime>
+
 #include "nbody.hpp"
 #include "helpers.hpp"
 #include "structures.hpp"
-#include "definitions.hpp"
+
+#define CSeed true
 
 int main()
 {

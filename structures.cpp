@@ -1,3 +1,7 @@
+#include <cstdbool>
+#include <cmath>
+
+#include "common.hpp"
 #include "structures.hpp"
 
 void Vec::operator +=(Vec v){
