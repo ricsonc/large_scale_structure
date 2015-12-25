@@ -31,7 +31,7 @@ class NBody {
               const int tilings = 15,
               const int grid_limit = 8,
               const int num_bodies = 4096,
-              const std::size_t drawsize = 1024,
+              const std::size_t drawsize = 256,
               const Real displacement = 0.2,
               const Real max_velocity = 1E+5); //m*s^-1
         std::vector<Body> bodies;

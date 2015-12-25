@@ -31,10 +31,11 @@ void to_image(std::vector<std::vector<bool>> &img, std::string filename){
         }
         std::string nstring = std::to_string(n);
         std::string header = "P1\n" + nstring + " " + nstring + "\n";
-        FILE * f = std::fopen(filename.c_str(), "w");
-        std::fwrite(&header, header.length(), 1, f);
-        std::fwrite(&outstring, outstring.size(), 1, f);
-        std::fclose(f);
+        std::ofstream f;
+        f.open(filename.c_str());
+        f.write(header.c_str(), sizeof(char)*header.size());
+        f.write(outstring.data(), sizeof(char)*outstring.size());
+        f.close();
 }
 
 Real unit_rand(){

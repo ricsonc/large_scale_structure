@@ -14,5 +14,6 @@ typedef double Real;
 #include <memory>
 #include <stack>
 #include <cstdbool>
+#include <fstream>
 
 #endif

@@ -145,8 +145,8 @@ NBody::NBody(std::string filename,
     this->uargs = {initsize, hubble, plummer, gravity};
     this->sargs = {QTR, mass, simtime, timestep, grid_limit};
     this->ioargs = {filename, drawsize, 0};
-    std::vector<Body> bodies = initialbodies(num_bodies, initsize, displacement, max_velocity);
-    std::vector<std::vector<Vec>> forcefield = init_field(resolution, tilings);
+    this->bodies = initialbodies(num_bodies, initsize, displacement, max_velocity);
+    this->force_field = init_field(resolution, tilings);
 }
 
 void NBody::metric_expansion(){
@@ -198,11 +198,14 @@ void NBody::simulate(bool verbose){
 
 void NBody::draw(){
     std::size_t dsize = ioargs.drawsize;
-    std::vector<std::vector<bool>> pixelarr (dsize, std::vector<bool> (dsize, false));
+    if(dsize == 0){
+        return;
+    }
+    std::vector<std::vector<bool>> pixelarr (dsize, std::vector<bool> (dsize, true));
     for(Body &body: this->bodies){
         int x = body.p.x/uargs.size*dsize;
         int y = body.p.y/uargs.size*dsize;
-        pixelarr[x][y] = true;
+        pixelarr[x][y] = false;
     }
-    to_image(pixelarr, std::to_string(ioargs.frame_num)+ioargs.filename+".ppm");
+    to_image(pixelarr, ioargs.filename+"/"+std::to_string(ioargs.frame_num)+".ppm");
 }
