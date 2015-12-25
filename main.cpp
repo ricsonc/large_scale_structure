@@ -9,4 +9,3 @@ int main()
     NBody universe = NBody("filament_simulation");
     universe.simulate();
 }
-

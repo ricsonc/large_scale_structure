@@ -67,13 +67,13 @@ std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
 Vec NBody::accel_body_point(Body B, Vec P, Real mass){
     Vec dp = P-B.p;
     Vec accel;
-    if(dp.norm_sq() > this->sargs.grid_limit*this->uargs.size/this->force_field.size()){
-        Vec indices = dp*(force_field.size()/this->uargs.size);
-        accel = this->force_field[indices.x][indices.y]*pow(this->uargs.size,-2);
+    if(dp.norm_sq() > sargs.grid_limit*uargs.size/this->force_field.size()){
+        Vec indices = dp*(force_field.size()/uargs.size);
+        accel = this->force_field[indices.x][indices.y]*pow(uargs.size,-2);
     } else {
-        accel = pp_acceleration(dp, this->uargs.plummer);
+        accel = pp_acceleration(dp, uargs.plummer);
     }
-    return accel*this->sargs.body_mass*mass*this->uargs.gconst;
+    return accel*sargs.body_mass*mass*uargs.gconst;
 }
 
 Vec NBody::accel_body_all(Body &B){
@@ -83,8 +83,8 @@ Vec NBody::accel_body_all(Body &B){
     while(!DFSS.empty()){
         Node *child = DFSS.top();
         DFSS.pop();
-        Real distance = periodic_dist(B.p, child->center.vec, this->uargs.size);
-        if(child->center.var == 0 || distance/std::sqrt(child->center.var) > this->sargs.QTR){
+        Real distance = periodic_dist(B.p, child->center.vec, uargs.size);
+        if(child->center.var == 0 || distance/std::sqrt(child->center.var) > sargs.QTR){
             accel += accel_body_point(B, child->center.vec, child->center.weight);
         } else {
             for(std::unique_ptr<Node> &neighbor: child->children){
@@ -140,15 +140,16 @@ NBody::NBody(std::string filename,
 {
     const Real initsize = size*exp(-hubble*simtime); //m
     const Real mass = pow(size, 3)*density/num_bodies; //kg
-    universe_args uargs = {initsize, hubble, plummer, gravity};
-    simulation_args sargs = {QTR, mass, simtime, timestep, grid_limit, filename, drawsize};
+    UArgs uargs = {initsize, hubble, plummer, gravity};
+    SArgs sargs = {QTR, mass, simtime, timestep, grid_limit};
+    IOArgs ioargs = {filename, drawsize, 0};
     std::vector<Body> bodies = initialbodies(num_bodies, initsize, mass, displacement, max_velocity);
     std::vector<std::vector<Vec>> forcefield = init_field(resolution, tilings);
 }
 
 void NBody::metric_expansion(){
-    Real ratio = 1+this->uargs.hubble*this->sargs.timestep;
-    this->uargs.size *= ratio;
+    Real ratio = 1+uargs.hubble*sargs.timestep;
+    uargs.size *= ratio;
     for(auto body: bodies){
         body.p = body.p*ratio;
     }
@@ -156,21 +157,21 @@ void NBody::metric_expansion(){
 
 void NBody::border_wrap(){
     for(auto body: this->bodies){
-        body.p.x = fmod(body.p.x, this->uargs.size);
-        body.p.y = fmod(body.p.y, this->uargs.size);
+        body.p.x = fmod(body.p.x, uargs.size);
+        body.p.y = fmod(body.p.y, uargs.size);
     }
 }
 
 void NBody::build_qtree(){
-    this->quadtree = qtree({{0,0},{this->uargs.size,this->uargs.size}}, this->bodies);
+    this->quadtree = qtree({{0,0},{uargs.size,uargs.size}}, this->bodies);
 }
 
 void NBody::leapfrog(){
     std::vector<Vec> accs = accel_all_all();
     int i = 0;
     for(Body &body: this->bodies){
-        body.p += body.v*this->sargs.timestep;
-        body.v += accs[i]*this->sargs.timestep;
+        body.p += body.v*sargs.timestep;
+        body.v += accs[i]*sargs.timestep;
         i++;
     }
 }
@@ -184,27 +185,22 @@ void NBody::step(){
 }
 
 void NBody::simulate(bool verbose){
-    for(int i = 0; i < this->sargs.simtime/this->sargs.timestep; i++){
+    for(int i = 0; i < sargs.simtime/sargs.timestep; i++){
         if(verbose){
-            printf("%f\n", this->sargs.timestep*i);
+            printf("%f\n", sargs.timestep*i);
         }
-        step(this->sargs.timestep, {this.simname+to_string(i)});
+        step();
     }
 }
 
-void NBody::draw(std::string filename){
-    Real dsize = this->dargs.size;
-    static bool init = true;
-    static std::vector<bool> pixelarr;
-    if(init){
-        pixelarr = new bool[dsize][dsize];
-        init = false;
-    }
-    memset(parr, false, dsize*dsize*sizeof(bool));
+void NBody::draw(){
+    std::size_t dsize = ioargs.drawsize;
+    std::vector<std::vector<bool>> pixelarr (dsize, std::vector<bool> (dsize, false));
     for(auto body: this->bodies){
         int x = body.p.x/uargs.size*dsize;
-        int y = body.p.x/uargs.size*dsize;
-        to_image[x%dsize][y%dsize] = true;
+        int y = body.p.y/uargs.size*dsize;
+        pixelarr[x][y] = true;
     }
-    to_image(parr, dsize, filename);
+    to_image(pixelarr, std::to_string(ioargs.frame_num)+ioargs.filename);
+    ioargs.frame_num ++;
 }

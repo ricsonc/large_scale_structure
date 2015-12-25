@@ -56,9 +56,14 @@ struct simulation_args {
     Real simtime;
     Real timestep;
     int grid_limit;
-    std::string filename;
-    int drawsize;
 };
 typedef struct simulation_args SArgs;
+
+struct input_output_args{
+    std::string filename;
+    std::size_t drawsize;
+    int frame_num;
+};
+typedef struct input_output_args IOArgs;
 
 #endif

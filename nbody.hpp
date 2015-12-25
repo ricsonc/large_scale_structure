@@ -35,8 +35,9 @@ class NBody {
               const Real displacement = 0.2,
               const Real max_velocity = 1E+5); //m*s^-1
         std::vector<Body> bodies;
-        universe_args uargs;
-        simulation_args sargs;
+        UArgs uargs;
+        SArgs sargs;
+        IOArgs ioargs;
         void simulate(bool verbose = true);
         void draw();
 };
