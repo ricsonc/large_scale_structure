@@ -62,3 +62,7 @@ Real periodic_dist(Vec pos1, Vec pos2, Real size){
     Real dy = std::min(dy_inner,dy_outer);
     return sqrt(dx*dx+dy*dy);
 }
+
+size_t posfmod(Real R, size_t n){
+    return ((size_t)fmod(R, n)+n)%n;
+}

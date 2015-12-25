@@ -69,10 +69,10 @@ std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
 Vec NBody::accel_body_point(Body B, Vec P, Real mass){
     Vec dp = P-B.p;
     Vec accel;
-    if(dp.norm_sq() > sargs.grid_limit*uargs.size/this->force_field.size()){
+    size_t n = this->force_field.size();
+    if(dp.norm_sq() > sargs.grid_limit*uargs.size/n){
         Vec indices = dp*(force_field.size()/uargs.size);
-        //need some modulo here
-        accel = this->force_field[indices.x][indices.y]*pow(uargs.size,-2);
+        accel = this->force_field[posfmod(indices.x,n)][posfmod(indices.y,n)]*pow(uargs.size,-2);
     } else {
         accel = pp_acceleration(dp, uargs.plummer);
     }
@@ -176,6 +176,9 @@ void NBody::leapfrog(){
         body.p += body.v*sargs.timestep;
         body.v += accs[i]*sargs.timestep;
         i++;
+        if(std::isnan(body.p.x) || std::isnan(body.p.y)){
+            break;
+        }
     }
 }
 
