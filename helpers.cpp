@@ -5,12 +5,12 @@ RandomVec mix_rvecs(std::vector<RandomVec> &rvecs){
     Real sum_weights = 0;
     Vec mean_vec = {0,0};
     Real sum_var = 0;
-    for(auto rvec: rvecs){
+    for(RandomVec &rvec: rvecs){
         sum_weights += rvec.weight;
         mean_vec += rvec.vec*rvec.weight;
     }
     mean_vec = mean_vec*(1/sum_weights);
-    for(auto rvec: rvecs){
+    for(RandomVec &rvec: rvecs){
         Vec diff_vec = rvec.vec;
         diff_vec += mean_vec*-1;
         sum_var += diff_vec.norm_sq()*rvec.weight+rvec.var;                
