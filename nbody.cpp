@@ -71,6 +71,7 @@ Vec NBody::accel_body_point(Body B, Vec P, Real mass){
     Vec accel;
     if(dp.norm_sq() > sargs.grid_limit*uargs.size/this->force_field.size()){
         Vec indices = dp*(force_field.size()/uargs.size);
+        //need some modulo here
         accel = this->force_field[indices.x][indices.y]*pow(uargs.size,-2);
     } else {
         accel = pp_acceleration(dp, uargs.plummer);
