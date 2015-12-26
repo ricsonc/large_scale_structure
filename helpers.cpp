@@ -28,8 +28,8 @@ void to_image(std::vector<std::vector<bool>> &img, std::string filename){
         size_t n = img.size();
         std::vector<char> outstring (2*n*n);
         for(std::size_t i = 0; i < n; i++){
-                for(std::size_t j = 0; j < img.size(); j++){
-                        int index = i*img.size()+j;
+                for(std::size_t j = 0; j < n; j++){
+                        int index = (n-1-i)*n+j;
                         outstring[index*2] = img[i][j] ? '1' : '0';
                         outstring[index*2+1] = (j+1 == n) ? '\n' : ' ';
                 }
@@ -44,12 +44,12 @@ void to_image(std::vector<std::vector<bool>> &img, std::string filename){
 }
 
 Real unit_rand(){
-    return (Real)rand()/(Real)RAND_MAX;
+    return (Real)rand()/RAND_MAX;
 }
 
 
 Vec rand_vec(){
-    return {unit_rand(), unit_rand()};
+    return {unit_rand()-0.5, unit_rand()-0.5};
 }
 
 Real distance(Vec pos1, Vec pos2){

@@ -62,10 +62,10 @@ std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
     std::vector<std::vector<Vec>> field (resolution, std::vector<Vec> (resolution, {0,0}));
     for(int i = 0; i < resolution; i++){
         for(int j = 0; j < resolution; j++){
-            for(int n = -tiling; n <= tiling; n++){
-                for(int m = -tiling; m <= tiling; m++){
-                    Vec p = {(i+0.5)/resolution+n,
-                             (j+0.5)/resolution+m};
+            for(int n = -tiling; n < tiling; n++){
+                for(int m = -tiling; m < tiling; m++){
+                    Vec p = {n+1-(i+0.5)/resolution,
+                             m+1-(j+0.5)/resolution};
                     field[i][j] += pp_acceleration(p);
                 }
             }

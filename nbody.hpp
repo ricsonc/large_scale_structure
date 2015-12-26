@@ -8,7 +8,7 @@
 #include "structures.hpp"
 
 class NBody {
-    private:
+private:
         std::unique_ptr<Node> quadtree;
         std::vector<std::vector<Vec>> force_field;
         void metric_expansion();
@@ -26,7 +26,7 @@ class NBody {
               const Real gravity = 6.67E-11, //m^3*kg^-1*s^-2
               const Real hubble = 2.25E-18, //s^-1
               const Real simtime = 5E+17, //s
-              const Real timestep = 5E+15, //s
+              const Real timestep = 5E+14, //s
               const Real QTR = 3,
               const int resolution = 1024,
               const int tilings = 15,
@@ -34,7 +34,7 @@ class NBody {
               const int num_bodies = 4096,
               const std::size_t drawsize = 1024,
               const Real displacement = 0.2,
-              const Real max_velocity = 1E+5); //m*s^-1
+              const Real max_velocity = 1E5); //m*s^-1
         std::vector<Body> bodies;
         UArgs uargs;
         SArgs sargs;
