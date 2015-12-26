@@ -1,6 +1,11 @@
 #include <stack>
 #include <memory>
 #include <cmath>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <cstdio>
+#include <omp.h>
 
 #include "nbody.hpp"
 #include "structures.hpp"
@@ -60,6 +65,7 @@ Vec pp_acceleration(Vec dp, Real plummer = 0){
 
 std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
     std::vector<std::vector<Vec>> field (resolution, std::vector<Vec> (resolution, {0,0}));
+    #pragma omp parallel for
     for(int i = 0; i < resolution; i++){
         for(int j = 0; j < resolution; j++){
             for(int n = -tiling; n < tiling; n++){
@@ -111,10 +117,9 @@ Vec NBody::accel_body_all(Body &B){
 
 std::vector<Vec> NBody::accel_all_all(){ 
     static std::vector<Vec> accs (this->bodies.size());
-    int i = 0;
-    for(Body &body: this->bodies){
-        accs[i] = accel_body_all(body);
-        i++;
+    #pragma omp parallel for
+    for(std::size_t i = 0; i < this->bodies.size(); i++){
+        accs[i] = accel_body_all(this->bodies[i]);
     }
     return accs;
 }
@@ -192,7 +197,7 @@ void NBody::leapfrog(){
 void NBody::simulate(bool verbose){
     for(int i = 0; i < sargs.simtime/sargs.timestep; i++){
         if(verbose){
-            printf("frame: %d, time: %.3e\n", ioargs.frame_num, sargs.timestep*i);
+            std::printf("frame: %d, time: %.3e\n", ioargs.frame_num, sargs.timestep*i);
         }
         build_qtree();
         leapfrog();
