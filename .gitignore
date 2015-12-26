@@ -2,3 +2,13 @@ todo
 Debug/*
 *.mk
 *.project
+Release/*
+*.txt
+*.vs
+compile command
+*.sdf
+*.sln
+*.vcx*
+*.spec
+*.exe
+x64/*
