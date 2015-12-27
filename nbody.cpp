@@ -118,7 +118,7 @@ Vec NBody::accel_body_all(Body &B){
 
 std::vector<Vec> NBody::accel_all_all(){ 
     static std::vector<Vec> accs (this->bodies.size());
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for(std::size_t i = 0; i < this->bodies.size(); i++){
         accs[i] = accel_body_all(this->bodies[i]);
     }
