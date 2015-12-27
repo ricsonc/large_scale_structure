@@ -60,8 +60,8 @@ Real distance(Vec pos1, Vec pos2){
 }
 
 Real periodic_dist(Vec pos1, Vec pos2, Real size){
-    Real dx_inner = abs(pos1.x - pos2.x);
-    Real dy_inner = abs(pos2.y - pos2.y);
+    Real dx_inner = std::fabs(pos1.x - pos2.x);
+    Real dy_inner = std::fabs(pos1.y - pos2.y);
     Real dx_outer = size-dx_inner;
     Real dy_outer = size-dy_inner;
     Real dx = std::min(dx_inner,dx_outer);

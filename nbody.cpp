@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <omp.h>
 #include <ctime>
+#include <cassert>
 
 #include "nbody.hpp"
 #include "structures.hpp"
@@ -56,9 +57,6 @@ std::unique_ptr<Node> qtree(Rect rect, std::vector<Body> &bodies){
 
 Vec pp_acceleration(Vec dp, Real plummer = 0){
     Real distancesq = dp.norm_sq();
-    if(distancesq == 0){
-        return {0,0};
-    }
     Real distance = std::sqrt(distancesq);
     Real mag_accel = 1/(distancesq+plummer*plummer);
     return dp*(mag_accel/distance);
@@ -106,7 +104,9 @@ Vec NBody::accel_body_all(Body &B){
         DFSS.pop();
         Real distance = periodic_dist(B.p, child->center.vec, uargs.size);
         if(child->center.var == 0 || distance/std::sqrt(child->center.var) > sargs.QTR){
-            accel += accel_body_point(B, child->center.vec, child->center.weight);
+            if(distance > 0){
+                accel += accel_body_point(B, child->center.vec, child->center.weight);
+            }
         } else {
             for(std::unique_ptr<Node> &neighbor: child->children){
                 DFSS.push(neighbor.get());
@@ -118,7 +118,7 @@ Vec NBody::accel_body_all(Body &B){
 
 std::vector<Vec> NBody::accel_all_all(){ 
     static std::vector<Vec> accs (this->bodies.size());
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for(std::size_t i = 0; i < this->bodies.size(); i++){
         accs[i] = accel_body_all(this->bodies[i]);
     }
@@ -134,7 +134,7 @@ std::vector<Body> initialbodies(int n, Real size, Real displacement_ratio, Real 
             Vec d_vector = rand_vec();
             Vec displacement = d_vector*displacement_ratio;
             Vec vel_displacement = d_vector*max_vel;
-            Vec p = {i+displacement.x, j+displacement.y};
+            Vec p = {i+displacement.x+.5, j+displacement.y+.5};
             bodies[i*side+j] = {p*radius, vel_displacement};
         }
     }
@@ -165,6 +165,9 @@ NBody::NBody(std::string filename,
     this->ioargs = {filename, drawsize, 0};
     this->bodies = initialbodies(num_bodies, initsize, displacement, max_velocity);
     this->force_field = init_field(resolution, tilings);
+    border_wrap();
+    build_qtree();
+    this->accs = accel_all_all();
 }
 
 void NBody::metric_expansion(){
@@ -186,17 +189,17 @@ void NBody::build_qtree(){
 }
 
 void NBody::leapfrog(){
-    std::vector<Vec> accs0 = accel_all_all();
-    int i = 0;
-    for(Body &body: this->bodies){
-        body.p += body.v*sargs.timestep+accs0[i]*pow(sargs.timestep,2)*.5;
-        i++;
-    }
-    std::vector<Vec> accs1 = accel_all_all();
+    std::vector<Vec> new_accs = accel_all_all();
     int j = 0;
     for(Body &body: this->bodies){
-        body.v += (accs0[j]+accs1[j])*sargs.timestep*.5;
+        body.v += (accs[j]+new_accs[j])*sargs.timestep*.5;
         j++;
+    }
+    accs = new_accs;
+    int i = 0;
+    for(Body &body: this->bodies){
+        body.p += body.v*sargs.timestep+accs[i]*pow(sargs.timestep,2)*.5;
+        i++;
     }
 }
 

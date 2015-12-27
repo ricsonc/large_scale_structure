@@ -10,6 +10,7 @@
 class NBody {
 private:
         std::unique_ptr<Node> quadtree;
+        std::vector<Vec> accs;
         std::vector<std::vector<Vec>> force_field;
         void metric_expansion();
         void border_wrap();
@@ -34,7 +35,7 @@ private:
               const int num_bodies = 4096,
               const std::size_t drawsize = 1024,
               const Real displacement = 0.2,
-              const Real max_velocity = 1E5); //m*s^-1
+              const Real max_velocity = 1E+5); //m*s^-1
         std::vector<Body> bodies;
         UArgs uargs;
         SArgs sargs;
