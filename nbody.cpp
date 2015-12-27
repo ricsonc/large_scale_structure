@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cstdio>
 #include <omp.h>
+#include <ctime>
 
 #include "nbody.hpp"
 #include "structures.hpp"
@@ -185,12 +186,17 @@ void NBody::build_qtree(){
 }
 
 void NBody::leapfrog(){
-    std::vector<Vec> accs = accel_all_all();
+    std::vector<Vec> accs0 = accel_all_all();
     int i = 0;
     for(Body &body: this->bodies){
-        body.p += body.v*sargs.timestep;
-        body.v += accs[i]*sargs.timestep;
+        body.p += body.v*sargs.timestep+accs0[i]*pow(sargs.timestep,2)*.5;
         i++;
+    }
+    std::vector<Vec> accs1 = accel_all_all();
+    int j = 0;
+    for(Body &body: this->bodies){
+        body.v += (accs0[j]+accs1[j])*sargs.timestep*.5;
+        j++;
     }
 }
 

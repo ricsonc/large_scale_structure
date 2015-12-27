@@ -9,6 +9,10 @@ void Vec::operator +=(Vec v){
     this->y += v.y;
 }
 
+Vec Vec::operator +(Vec v){
+    return {v.x+this->x, v.y+this->y};
+}
+
 Vec Vec::operator *(Real scalar){
     return {this->x*scalar, this->y*scalar};
 }

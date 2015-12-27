@@ -12,6 +12,7 @@ struct Vec {
     Real x;
     Real y;
     void operator +=(Vec v);
+    Vec operator +(Vec v);
     Vec operator *(Real scalar);
     Vec operator -(Vec v);
     void operator %=(Real scalar);

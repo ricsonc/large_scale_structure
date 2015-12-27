@@ -5,6 +5,7 @@
 
 #include "helpers.hpp"
 #include "common.hpp"
+#include "structures.hpp"
 
 RandomVec mix_rvecs(std::vector<RandomVec> &rvecs){
     Real sum_weights = 0;
