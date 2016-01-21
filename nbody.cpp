@@ -71,7 +71,9 @@ std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
                 for(int m = -tiling; m < tiling; m++){
                     Vec p = {n+1-(i+0.5)/resolution,
                              m+1-(j+0.5)/resolution};
-                    field[i][j] += pp_acceleration(p);
+                    if(p.norm_sq() < tiling){
+                        field[i][j] += pp_acceleration(p);
+                    }
                 }
             }
         }
@@ -79,13 +81,13 @@ std::vector<std::vector<Vec>> init_field(int resolution, int tiling){
     return field;
 }
 
-Vec NBody::accel_body_point(Body B, Vec P, Real mass){
+Vec NBody::accel_body_point(Body &B, Vec &P, Real mass){
     Vec dp = (P-B.p)%uargs.size;
     Vec accel;
-    size_t n = this->force_field.size();
+    std::size_t n = force_field.size();
     if(dp.norm_sq() > sargs.grid_limit*uargs.size/n){
-        Vec indices = dp*(force_field.size()/uargs.size);
-        accel = this->force_field[(int)indices.x][(int)indices.y]*pow(uargs.size,-2);
+        Vec indices = dp*(n/uargs.size);
+        accel = force_field[(std::size_t)indices.x][(std::size_t)indices.y]*pow(uargs.size,-2);
     } else {
         Real xu = dp.x-uargs.size;
         Real yu = dp.y-uargs.size;
@@ -117,10 +119,11 @@ Vec NBody::accel_body_all(Body &B){
 }
 
 std::vector<Vec> NBody::accel_all_all(){ 
-    static std::vector<Vec> accs (this->bodies.size());
+    size_t n = bodies.size();
+    static std::vector<Vec> accs (n);
     #pragma omp parallel for
-    for(std::size_t i = 0; i < this->bodies.size(); i++){
-        accs[i] = accel_body_all(this->bodies[i]);
+    for(std::size_t i = 0; i < n; i++){
+        accs[i] = accel_body_all(bodies[i]);
     }
     return accs;
 }
@@ -147,6 +150,7 @@ NBody::NBody(std::string filename,
              const Real plummer,
              const Real gravity,
              const Real hubble,
+             const Real damping,
              const Real simtime,
              const Real timestep,
              const Real QTR,
@@ -155,14 +159,15 @@ NBody::NBody(std::string filename,
              const int grid_limit,
              const int num_bodies,
              const std::size_t drawsize,
+             const int draw_freq,
              const Real displacement,
              const Real max_velocity) 
 {
     const Real initsize = size*exp(-hubble*simtime); //m
     const Real mass = pow(size, 3)*density/num_bodies; //kg
     this->uargs = {initsize, hubble, plummer, gravity};
-    this->sargs = {QTR, mass, simtime, timestep, grid_limit};
-    this->ioargs = {filename, drawsize, 0};
+    this->sargs = {QTR, mass, simtime, timestep, grid_limit, damping};
+    this->ioargs = {filename, drawsize, 0, draw_freq};
     this->bodies = initialbodies(num_bodies, initsize, displacement, max_velocity);
     this->force_field = init_field(resolution, tilings);
     border_wrap();
@@ -179,40 +184,52 @@ void NBody::metric_expansion(){
 }
 
 void NBody::border_wrap(){
-    for(Body &body: this->bodies){
+    for(Body &body: bodies){
         body.p %= uargs.size;
     }
 }
 
 void NBody::build_qtree(){
-    quadtree = qtree({{0,0},{uargs.size,uargs.size}}, this->bodies);
+    quadtree = qtree({{0,0},{uargs.size,uargs.size}}, bodies);
 }
 
 void NBody::leapfrog(){
     std::vector<Vec> new_accs = accel_all_all();
     int j = 0;
-    for(Body &body: this->bodies){
+    for(Body &body: bodies){
         body.v += (accs[j]+new_accs[j])*sargs.timestep*.5;
+        body.v = body.v * (1 - sargs.damping*sargs.timestep);
         j++;
     }
     accs = new_accs;
     int i = 0;
-    for(Body &body: this->bodies){
+    for(Body &body: bodies){
         body.p += body.v*sargs.timestep+accs[i]*pow(sargs.timestep,2)*.5;
         i++;
     }
+}
+
+Real NBody::kinetic(){
+    Real energy = 0;
+    for(Body &body: bodies){
+        energy += body.v.norm_sq();
+    }
+    return energy*sargs.body_mass*0.5;
 }
 
 void NBody::simulate(bool verbose){
     for(int i = 0; i < sargs.simtime/sargs.timestep; i++){
         if(verbose){
             std::printf("frame: %d, time: %.3e\n", ioargs.frame_num, sargs.timestep*i);
+            std::printf("energy: %.3e\n", this->kinetic());
         }
         build_qtree();
         leapfrog();
         border_wrap();
         metric_expansion();
-        draw();
+        if(i%ioargs.frequency == 0){
+            draw();
+        }
         ioargs.frame_num++;
     }
 }
@@ -223,7 +240,7 @@ void NBody::draw(){
         return;
     }
     std::vector<std::vector<bool>> pixelarr (dsize, std::vector<bool> (dsize, true));
-    for(Body &body: this->bodies){
+    for(Body &body: bodies){
         size_t x = body.p.x/uargs.size*dsize;
         size_t y = body.p.y/uargs.size*dsize;
         pixelarr[x][y] = false;
