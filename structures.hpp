@@ -17,6 +17,7 @@ struct Vec {
     Vec operator -(Vec v);
     void operator %=(Real scalar);
     Vec operator %(Real scalar);
+    bool operator ==(Vec v);
     Real norm_sq();
 };
 typedef struct Vec Vec;
@@ -32,6 +33,7 @@ struct Rect {
     Vec pos0;
     Vec pos1;
     bool contains(Vec pos);
+    bool operator ==(Rect r);
 };
 typedef struct Rect Rect;
 

@@ -10,6 +10,7 @@
 #include <cassert>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 
 #include "nbody.hpp"
 #include "structures.hpp"
@@ -31,20 +32,29 @@ std::array<Rect, 4> split_rect(Rect rect){
         return rects;
 }
 
-std::unique_ptr<Node> qtree(Rect rect, std::vector<Body> &bodies){
+std::unique_ptr<Node> qtree(Rect rect, std::vector<Body*> &bptrs){
     std::unique_ptr<Node> root (new Node());
     root->rect = rect;
-    if(bodies.size() == 1){
-        root->center = {bodies[0].p,0,1};
+    if(bptrs.size() == 1){
+        root->center = {bptrs[0]->p,0,1};
         return root;
     }
     std::array<Rect,4> rects = split_rect(root->rect);
     std::vector<RandomVec> centers;
-    for(auto &rect: rects){
-        std::vector<Body>quadrant;
-        for(Body &body: bodies){
-            if(rect.contains(body.p)){
-                quadrant.push_back(body);
+    std::vector<Rect> rect_map(bptrs.size());
+    for(std::size_t i = 0; i < rect_map.size(); i++){
+        for(Rect &rect: rects){
+            if(rect.contains(bptrs[i]->p)){
+                rect_map[i] = rect;
+                break;
+            }
+        }
+    }
+    for(Rect &rect: rects){
+        std::vector<Body*> quadrant;
+        for(std::size_t i = 0; i < bptrs.size(); i++){
+            if(rect_map[i] == rect){
+                quadrant.push_back(bptrs[i]);
             }
         }
         if(quadrant.size()){
@@ -192,7 +202,11 @@ void NBody::border_wrap(){
 }
 
 void NBody::build_qtree(){
-    quadtree = qtree({{0,0},{uargs.size,uargs.size}}, bodies);
+    std::vector<Body*> bptrs;
+    for(Body &body: bodies){
+        bptrs.push_back(&body);
+    }
+    quadtree = qtree({{0,0},{uargs.size,uargs.size}}, bptrs);
 }
 
 void NBody::leapfrog(){
@@ -224,13 +238,24 @@ void NBody::simulate(bool verbose){
         if(verbose){
             std::printf("frame: %d, time: %.3e\n", ioargs.frame_num, sargs.timestep*i);
         }
+        auto t0 = std::chrono::system_clock::now();
         build_qtree();
+        auto t1 = std::chrono::system_clock::now();
         leapfrog();
+        auto t2 = std::chrono::system_clock::now();
         border_wrap();
         metric_expansion();
+        auto t3 = std::chrono::system_clock::now();
         if(i%ioargs.frequency == 0){
             draw();
             data_dump();
+        }
+        auto t4 = std::chrono::system_clock::now();
+        if(verbose){
+            std::printf("%lld %lld %lld %lld\n", (t1-t0).count()/1000000, 
+                                                 (t2-t1).count()/1000000, 
+                                                 (t3-t2).count()/1000000, 
+                                                 (t4-t3).count()/1000000);
         }
         ioargs.frame_num++;
     }
@@ -252,13 +277,9 @@ void NBody::draw(){
 
 void NBody::data_dump(){
     std::string filename = ioargs.filename+"/"+std::to_string(ioargs.frame_num)+".dump";
-    std::ofstream f;
-    f.open(filename.c_str());
-    std::stringstream outstream;
+    std::FILE *f = std::fopen(filename.c_str(), "w");
     for(Body &body: bodies){
-        outstream << body.p.x << " " << body.p.y << std::endl;
+        std::fprintf(f, "%.6e %.6e\n", body.p.x, body.p.y);
     }
-    std::string outstring = outstream.str();
-    f.write(outstring.c_str(), sizeof(char)*outstring.size());
-    f.close();
+    std::fclose(f);
 }

@@ -1,4 +1,5 @@
 #include <ctime>
+#include <omp.h>
 
 #include "nbody.hpp"
 #include "helpers.hpp"

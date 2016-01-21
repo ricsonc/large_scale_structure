@@ -21,6 +21,10 @@ Vec Vec::operator -(Vec v){
     return {v.x-this->x, v.y-this->y};
 }
 
+bool Vec::operator ==(Vec v){
+    return (v.x == this->x) && (v.y == this->y);
+}
+
 Real pfmod(Real x, Real y){
     return fmod(fmod(x,y)+y,y);
 }
@@ -43,4 +47,8 @@ bool Rect::contains(Vec pos){
             pos.y >= this->pos0.y &&
             pos.x < this->pos1.x &&
             pos.y < this->pos1.y);
+}
+
+bool Rect::operator ==(Rect r){
+    return (r.pos0 == this->pos0) && (r.pos1 == this->pos0);
 }

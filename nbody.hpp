@@ -31,12 +31,12 @@ class NBody {
               const Real simtime = 5E+17, //s
               const Real timestep = 5E+13, //s
               const Real QTR = 3,
-              const int resolution = 2<<12,
-              const int tilings = (2<<5)-1,
-              const int grid_limit = 2<<6,
-              const int num_bodies = 2<<20,
-              const std::size_t drawsize = 2<<12,
-              const int draw_freq = 5,
+              const int resolution = 1<<12,
+              const int tilings = (1<<5)-1,
+              const int grid_limit = 1<<6,
+              const int num_bodies = 1<<20,
+              const std::size_t drawsize = 1<<12,
+              const int draw_freq = 200,
               const Real displacement = 0.2,
               const Real max_velocity = 5E+4); //m*s^-1
         std::vector<Body> bodies;
