@@ -8,6 +8,8 @@
 #include <omp.h>
 #include <ctime>
 #include <cassert>
+#include <fstream>
+#include <sstream>
 
 #include "nbody.hpp"
 #include "structures.hpp"
@@ -221,7 +223,6 @@ void NBody::simulate(bool verbose){
     for(int i = 0; i < sargs.simtime/sargs.timestep; i++){
         if(verbose){
             std::printf("frame: %d, time: %.3e\n", ioargs.frame_num, sargs.timestep*i);
-            std::printf("energy: %.3e\n", this->kinetic());
         }
         build_qtree();
         leapfrog();
@@ -229,6 +230,7 @@ void NBody::simulate(bool verbose){
         metric_expansion();
         if(i%ioargs.frequency == 0){
             draw();
+            data_dump();
         }
         ioargs.frame_num++;
     }
@@ -246,4 +248,17 @@ void NBody::draw(){
         pixelarr[x][y] = false;
     }
     to_image(pixelarr, ioargs.filename+"/"+std::to_string(ioargs.frame_num)+".ppm");
+}
+
+void NBody::data_dump(){
+    std::string filename = ioargs.filename+"/"+std::to_string(ioargs.frame_num)+".dump";
+    std::ofstream f;
+    f.open(filename.c_str());
+    std::stringstream outstream;
+    for(Body &body: bodies){
+        outstream << body.p.x << " " << body.p.y << std::endl;
+    }
+    std::string outstring = outstream.str();
+    f.write(outstring.c_str(), sizeof(char)*outstring.size());
+    f.close();
 }

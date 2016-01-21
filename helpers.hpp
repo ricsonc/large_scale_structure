@@ -4,6 +4,7 @@
 #include <cstdlib> 
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include "structures.hpp"
 #include "common.hpp"

@@ -34,7 +34,6 @@ Vec Vec::operator %(Real scalar){
     return {pfmod(this->x, scalar), pfmod(this->y, scalar)};
 }
 
-
 Real Vec::norm_sq(){
     return pow(this->x,2)+pow(this->y,2);
 }
