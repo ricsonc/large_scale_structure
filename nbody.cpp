@@ -43,28 +43,28 @@ std::unique_ptr<Node> qtree(Rect rect, std::vector<Body*> &bptrs){
     std::vector<RandomVec> centers;
     std::vector<Rect> rect_map(bptrs.size());
     for(std::size_t i = 0; i < rect_map.size(); i++){
-        for(Rect &rect: rects){
-            if(rect.contains(bptrs[i]->p)){
-                rect_map[i] = rect;
+        for(Rect &subrect: rects){
+            if(subrect.contains(bptrs[i]->p)){
+                rect_map[i] = subrect;
                 break;
             }
         }
     }
-    for(Rect &rect: rects){
+    for(Rect &subrect: rects){
         std::vector<Body*> quadrant;
         for(std::size_t i = 0; i < bptrs.size(); i++){
-            if(rect_map[i] == rect){
+            if(rect_map[i] == subrect){
                 quadrant.push_back(bptrs[i]);
             }
         }
         if(quadrant.size()){
-            std::unique_ptr<Node> child = qtree(rect, quadrant);
+            std::unique_ptr<Node> child = qtree(subrect, quadrant);
             centers.push_back(child->center);
             root->children.push_back(std::move(child));
         }
     }
     root->center = mix_rvecs(centers);
-    return root; 
+    return root;
 }
 
 Vec pp_acceleration(Vec dp, Real plummer = 0){

@@ -50,5 +50,5 @@ bool Rect::contains(Vec pos){
 }
 
 bool Rect::operator ==(Rect r){
-    return (r.pos0 == this->pos0) && (r.pos1 == this->pos0);
+    return (r.pos0 == this->pos0) && (r.pos1 == this->pos1);
 }
