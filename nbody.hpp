@@ -31,7 +31,7 @@ class NBody {
               const Real simtime = 5E+17, //s
               const Real timestep = 5E+13, //s
               const Real QTR = 3,
-              const int resolution = 1<<10,
+              const int resolution = 1<<12,
               const int tilings = (1<<5)-1,
               const int grid_limit = 1<<6,
               const int num_bodies = 1<<20,
