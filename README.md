@@ -11,74 +11,74 @@ The numerical integration used is a symplectic leapfrog method. In order to avoi
 
 Options: preface these with --
 
-filename : string
-the directory to which the ouput will be saved
+filename : string <br />
+the directory to which the ouput will be saved <br />
 defaults to current directory
 
-density : double
-the density of the universe
+density : double <br />
+the density of the universe <br />
 defaults to 1E-26 kg*m^-2
 
-size : double
-the size (diameter) of the universe in m
+size : double <br />
+the size (diameter) of the universe in m <br />
 defaults to 2E+24 m
 
-plummer : double
-a smoothing parameter used to prevent singularities
+plummer : double <br />
+a smoothing parameter used to prevent singularities <br />
 defaults to 5E+21 m
 
-gravity: double
-the gravitational constant
+gravity: double <br />
+the gravitational constant <br />
 defaults to 6.67E-11 m^3*kg^-1*s^-2
 
-hubble: double
-the hubble constant used to calculate metric expansion
+hubble: double <br />
+the hubble constant used to calculate metric expansion <br />
 defaults to 2.25E-18 s^-1
 
-damping: double
-a stability parameter used to maintain constant energy
+damping: double <br />
+a stability parameter used to maintain constant energy <br />
 defaults to 1E-17 s^-1
 
-simtime: double
-amount of simulation time to run for
+simtime: double <br />
+amount of simulation time to run for <br />
 defaults to 5E+17 s
 
-timestep: double
-amount of time per timestep
+timestep: double <br />
+amount of time per timestep <br />
 defaults to 1E+14 s
 
-quadtree_ratio: double
-a parameter which controls the degree of accuracy
+quadtree_ratio: double <br />
+a parameter which controls the degree of accuracy <br />
 defaults to 3.0
 
-mesh_resolution : int
-a parameter which controls the degree of accuracy
+mesh_resolution : int <br />
+a parameter which controls the degree of accuracy <br />
 defaults to 4096
 
-periodic_tilings : int
-a parameter which controls the degree of accuracy
+periodic_tilings : int <br />
+a parameter which controls the degree of accuracy <br />
 defaults to 31
 
-mesh_limits : int
-a parameter which determines whether the mesh is used for each body
+mesh_limits : int <br />
+a parameter which determines whether the mesh is used for each body <br />
 defaults to 64
 
-bodies : int
-the number of gravitational bodies to simulate
+bodies : int <br />
+the number of gravitational bodies to simulate <br />
 defaults to 2^20 = 1048576
 
-draw_size : int
-dimensions of the ouput image in pixels
+draw_size : int <br />
+dimensions of the ouput image in pixels <br />
 defaults to 4096
 
-displacement : double
-degree of uniformity in the initial conditions
+displacement : double <br />
+degree of uniformity in the initial conditions <br />
 defaults to 0.2
 
-init_velocity : double
-initial random velocity given to bodies
+init_velocity : double <br />
+initial random velocity given to bodies <br />
 defaults to 5E+4
 
-verbose : int
-indicates the degree of verbosity
+verbose : int <br />
+indicates the degree of verbosity <br />
 defaults to 1
