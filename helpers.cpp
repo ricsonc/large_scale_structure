@@ -19,7 +19,7 @@ RandomVec mix_rvecs(std::vector<RandomVec> &rvecs){
     for(RandomVec &rvec: rvecs){
         Vec diff_vec = rvec.vec;
         diff_vec += mean_vec*-1;
-        sum_var += diff_vec.norm_sq()*rvec.weight+rvec.var;                
+        sum_var += diff_vec.norm_sq()*rvec.weight+rvec.var;
     }
     sum_var /= sum_weights;
     return {mean_vec, sum_var, sum_weights};
