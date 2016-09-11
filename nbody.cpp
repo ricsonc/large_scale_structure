@@ -122,7 +122,6 @@ Vec NBody::accel_body_all(Body &B){
         if(child->center.var == 0 ||
            distance/std::sqrt(child->center.var) > sargs.QTR){
             if(distance > 0){
-                Vec a = accel_body_point(B, child->center.vec, child->center.weight);
                 accel += accel_body_point(B, child->center.vec,
                                           child->center.weight);
             }
@@ -216,6 +215,12 @@ void NBody::build_qtree(){
     quadtree = qtree({{0,0},{uargs.size,uargs.size}}, bptrs);
 }
 
+void NBody::offset(Vec shift){
+    for(Body &body: bodies){
+        body.p += shift;
+    }
+}
+
 void NBody::leapfrog(){
     std::vector<Vec> new_accs = accel_all_all();
     int j = 0;
@@ -238,23 +243,26 @@ void NBody::simulate(bool verbose){
             std::printf("iteration: %d\n", ioargs.frame_num);
         }
         auto t0 = std::chrono::system_clock::now();
+        Vec shift = rand_vec()*uargs.size;
+        offset(shift);
+        border_wrap();
         build_qtree();
-        auto t1 = std::chrono::system_clock::now();
+
         leapfrog();
-        auto t2 = std::chrono::system_clock::now();
+        offset(shift*(-1));
         border_wrap();
         metric_expansion();
-        auto t3 = std::chrono::system_clock::now();
+        auto t1 = std::chrono::system_clock::now();
         if(i%ioargs.frequency == 0){
             draw();
-            data_dump();
+            if(0){
+                data_dump();
+            }
         }
-        auto t4 = std::chrono::system_clock::now();
+        auto t2 = std::chrono::system_clock::now();
         if(verbose){
-            std::printf("\t quadtree construction  : %ld\n", (t1-t0).count()/1000000);
-            std::printf("\t barnes hut algorithm   : %ld\n", (t2-t1).count()/1000000);
-            std::printf("\t metric expansion       : %ld\n", (t3-t2).count()/1000000);
-            std::printf("\t writing to file        : %ld\n", (t4-t3).count()/1000000);
+            std::printf("\t simulation time : %ld\n", (t1-t0).count()/1000000);
+            std::printf("\t io write time   : %ld\n", (t2-t1).count()/1000000);
         }
         ioargs.frame_num++;
     }
@@ -265,24 +273,31 @@ void NBody::draw(){
     if(dsize == 0){
         return;
     }
-    std::vector<std::vector<bool>> pixelarr (dsize,
-                                             std::vector<bool> (dsize, true));
+    std::vector<std::vector<int>> pixelarr (dsize,
+                                             std::vector<int> (dsize, 0));
     for(Body &body: bodies){
         size_t x = body.p.x/uargs.size*dsize;
         size_t y = body.p.y/uargs.size*dsize;
-        pixelarr[x][y] = false;
+        pixelarr[x][y] ++;
     }
     to_image(pixelarr,
-             ioargs.filename+"/"+std::to_string(ioargs.frame_num)+".ppm");
+             ioargs.filename+"/"+std::to_string(ioargs.frame_num)+".pgm");
 }
 
 void NBody::data_dump(){
+    size_t n = bodies.size();
+    std::vector<char *> lines (n);
+    #pragma omp parallel for
+    for(std::size_t i = 0; i < n; i ++){
+        asprintf(&lines[i], "%.6e %.6e\n",
+                 bodies[i].p.x, bodies[i].p.y);
+    }
     std::string filename = (ioargs.filename+"/"+
                             std::to_string(ioargs.frame_num)+".dump");
-    std::FILE *f = std::fopen(filename.c_str(), "w");
-    for(Body &body: bodies){
-        std::fprintf(f, "%.12e %.12e %.12e %.12e\n",
-                     body.p.x, body.p.y, body.v.x, body.v.y);
+    std::ofstream f;
+    f.open(filename.c_str());
+    for(char * line : lines){
+        f.write(line, strlen(line));
     }
-    std::fclose(f);
+    f.close();
 }

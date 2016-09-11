@@ -17,10 +17,10 @@ int main(int argc, char **argv)
     std::string filename = ".";
     Real density = 1E-26; //kg*m^-3
     Real size = 2E+24; //m
-    Real plummer = 5E+21; //m
+    Real plummer = 2E+21; //m
     Real gravity = 6.67E-11; //m^3*kg^-1*s^-2
     Real hubble = 2.25E-18; //s^-1
-    Real damping = 1E-17;
+    Real damping = 7E-18;
     Real simtime = 5E+17; //s
     Real timestep = 1E+14; //s
     Real QTR = 3;
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     int tilings = (1<<5)-1;
     int grid_limit = 1<<6;
     int num_bodies = 1<<20;
-    std::size_t drawsize = 1<<12;
+    std::size_t drawsize = 1<<11;
     int draw_freq = 1;
     Real displacement = 0.2;
     Real max_velocity = 5E+4; //m*s^-1

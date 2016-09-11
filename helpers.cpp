@@ -25,18 +25,21 @@ RandomVec mix_rvecs(std::vector<RandomVec> &rvecs){
     return {mean_vec, sum_var, sum_weights};
 }
 
-void to_image(std::vector<std::vector<bool>> &img, std::string filename){
+void to_image(std::vector<std::vector<int>> &img, std::string filename){
         size_t n = img.size();
         std::vector<char> outstring (2*n*n);
         for(std::size_t i = 0; i < n; i++){
                 for(std::size_t j = 0; j < n; j++){
                         int index = (n-1-i)*n+j;
-                        outstring[index*2] = img[i][j] ? '1' : '0';
+                        int overlap = img[i][j];
+                        int value = overlap ? overlap/2+4 : 0;
+                        outstring[index*2] = std::min(value,9) + '0';
                         outstring[index*2+1] = (j+1 == n) ? '\n' : ' ';
                 }
         }
         std::string nstring = std::to_string(n);
-        std::string header = "P1\n" + nstring + " " + nstring + "\n";
+        std::string header = ("P2\n" + nstring + " " + nstring +
+                              "\n" + '9' + '\n');
         std::ofstream f;
         f.open(filename.c_str());
         f.write(header.c_str(), sizeof(char)*header.size());
