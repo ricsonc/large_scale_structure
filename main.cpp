@@ -17,10 +17,10 @@ int main(int argc, char **argv)
     std::string filename = ".";
     Real density = 1E-26; //kg*m^-3
     Real size = 2E+24; //m
-    Real plummer = 2E+21; //m
+    Real plummer = 5E+21; //m
     Real gravity = 6.67E-11; //m^3*kg^-1*s^-2
     Real hubble = 2.25E-18; //s^-1
-    Real damping = 7E-18;
+    Real damping = 1E-17;
     Real simtime = 5E+17; //s
     Real timestep = 1E+14; //s
     Real QTR = 3;
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     int tilings = (1<<5)-1;
     int grid_limit = 1<<6;
     int num_bodies = 1<<20;
-    std::size_t drawsize = 1<<11;
+    std::size_t drawsize = 1<<10;
     int draw_freq = 1;
     Real displacement = 0.2;
     Real max_velocity = 5E+4; //m*s^-1
@@ -67,55 +67,58 @@ int main(int argc, char **argv)
             filename = optarg;
             break;
         case 2:
-            size = atof(optarg);
+            density = atof(optarg);
             break;
         case 3:
-            plummer = atof(optarg);
+            size = atof(optarg);
             break;
         case 4:
-            gravity = atof(optarg);
+            plummer = atof(optarg);
             break;
         case 5:
-            hubble = atof(optarg);
+            gravity = atof(optarg);
             break;
         case 6:
-            damping = atof(optarg);
+            hubble = atof(optarg);
             break;
         case 7:
+            damping = atof(optarg);
+            break;
+        case 8:
             assert(optarg);
             simtime = atof(optarg);
             break;
-        case 8:
+        case 9:
             timestep = atof(optarg);
             break;
-        case 9:
+        case 10:
             QTR = atof(optarg);
             break;
-        case 10:
+        case 11:
             resolution = atof(optarg);
             break;
-        case 11:
+        case 12:
             tilings = atoi(optarg);
             break;
-        case 12:
+        case 13:
             grid_limit = atoi(optarg);
             break;
-        case 13:
+        case 14:
             num_bodies = atoi(optarg);
             break;
-        case 14:
+        case 15:
             drawsize = atoi(optarg);
             break;
-        case 15:
+        case 16:
             draw_freq = atoi(optarg);
             break;
-        case 16:
+        case 17:
             displacement = atof(optarg);
             break;
-        case 17:
+        case 18:
             max_velocity = atof(optarg);
             break;
-        case 18:
+        case 19:
             verbosity = atoi(optarg);
             break;
         default:

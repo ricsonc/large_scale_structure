@@ -30,11 +30,9 @@ void to_image(std::vector<std::vector<int>> &img, std::string filename){
         std::vector<char> outstring (2*n*n);
         for(std::size_t i = 0; i < n; i++){
                 for(std::size_t j = 0; j < n; j++){
-                        int index = (n-1-i)*n+j;
-                        int overlap = img[i][j];
-                        int value = overlap ? overlap/2+4 : 0;
-                        outstring[index*2] = std::min(value,9) + '0';
-                        outstring[index*2+1] = (j+1 == n) ? '\n' : ' ';
+                    int index = (n-1-i)*n+j;
+                    outstring[index*2] = std::min((img[i][j]+3)/4,9) + '0';
+                    outstring[index*2+1] = (j+1 == n) ? '\n' : ' ';
                 }
         }
         std::string nstring = std::to_string(n);
